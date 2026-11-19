@@ -2,1713 +2,308 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Sjaman GPT – innspillingsliste</title>
 <style>
+  :root {
+    --bg: #f6f5f2; --kort: #ffffff; --tekst: #16181d; --dempet: #6b6f78; --kant: #e2e0da;
+    --grønn: #15803d; --grønn-bg: #dcfce7; --rød: #b91c1c; --rød-bg: #fee2e2; --gul: #ca8a04; --blå: #1d4ed8;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1220; --kort: #181c2e; --tekst: #eef1fb; --dempet: #9aa2bd; --kant: #2a3048;
+      --grønn: #4ade80; --grønn-bg: #14321f; --rød: #f87171; --rød-bg: #3a1717; --gul: #facc15; --blå: #93b4ff; color-scheme: dark; }
+  }
   * { box-sizing: border-box; }
-  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #111; background: #fff; margin: 0; padding: 24px 16px 48px; font-size: 14px; }
-  .side { max-width: 900px; margin: 0 auto; }
-  header { border-bottom: 3px solid #111; padding-bottom: 12px; margin-bottom: 8px; }
-  h1 { margin: 0; font-size: 26px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 8px; color: #333; }
-  .hjelp { background: #f4f4f4; border-radius: 8px; padding: 12px 16px; margin: 16px 0 8px; line-height: 1.55; }
-  .hjelp ol { margin: 6px 0 0; padding-left: 20px; }
-  .knapp { display: inline-block; margin-top: 10px; padding: 8px 16px; border: 2px solid #111; border-radius: 8px; background: #fff; font: inherit; font-weight: 600; cursor: pointer; }
-  section { margin-top: 26px; }
-  h2 { font-size: 18px; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; }
-  h2 small { font-size: 12px; font-weight: 400; color: #666; }
-  .under { margin: 0 0 6px; color: #555; font-size: 12px; }
-  .tabell { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #555; border-bottom: 2px solid #111; padding: 4px 6px; }
-  td { border-bottom: 1px solid #bbb; padding: 7px 6px; vertical-align: top; }
-  tr { break-inside: avoid; page-break-inside: avoid; }
-  td.boks { width: 52px; text-align: center; }
-  td.boks span { display: inline-block; width: 16px; height: 16px; border: 1.5px solid #111; border-radius: 3px; }
-  td.fil { width: 110px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #333; }
-  td.replikk { width: 45%; }
-  td.notat { width: 25%; }
-  tr.ny td { height: 34px; }
-  .nytt-tema { margin-top: 18px; break-inside: avoid; page-break-inside: avoid; }
-  .nytt-tema td.fil { width: 130px; }
-  .linje { border-bottom: 1px solid #bbb; padding: 10px 0 4px; }
-  @media (max-width: 600px) {
-    section table { min-width: 620px; }
-  }
-  @media print {
-    body { padding: 0; font-size: 12px; }
-    .knapp, .skjul-utskrift { display: none; }
-    .ny-side { break-before: page; page-break-before: always; }
-    @page { size: A4; margin: 14mm 12mm; }
-  }
+  body { margin: 0; background: var(--bg); color: var(--tekst); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 20px 16px calc(110px + env(safe-area-inset-bottom, 0px)); }
+  .side { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.3px; }
+  .ingress { color: var(--dempet); margin: 0 0 16px; }
+  .hjelp { background: var(--kort); border: 1px solid var(--kant); border-radius: 12px; padding: 12px 16px; }
+  .hjelp ol { margin: 4px 0 0; padding-left: 20px; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 4px; }
+  nav a { font-size: 13px; color: var(--tekst); text-decoration: none; background: var(--kort); border: 1px solid var(--kant); border-radius: 999px; padding: 3px 10px; }
+  nav a .ferdig { color: var(--grønn); }
+  section { margin-top: 30px; scroll-margin-top: 12px; }
+  h2 { font-size: 19px; margin: 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  h2 small { font-size: 13px; font-weight: 400; color: var(--dempet); }
+  .under { color: var(--dempet); font-size: 13px; margin: 2px 0 10px; }
+  .rad { background: var(--kort); border: 1px solid var(--kant); border-left: 4px solid var(--kant); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .rad.behold { border-left-color: var(--grønn); }
+  .rad.fjern { border-left-color: var(--rød); }
+  .rad.fjern .tekst { text-decoration: line-through; color: var(--dempet); }
+  .topp { display: flex; gap: 10px; align-items: baseline; }
+  .fil { font: 12px ui-monospace, Consolas, monospace; color: var(--dempet); flex-shrink: 0; min-width: 92px; }
+  .tekst { flex: 1; }
+  .tekst i { color: var(--dempet); }
+  .valg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .valg button, .legg-til, .liten { font: inherit; font-size: 13px; border: 1px solid var(--kant); background: transparent; color: var(--tekst); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .valg .b-behold[aria-pressed=true] { background: var(--grønn-bg); border-color: var(--grønn); color: var(--grønn); font-weight: 600; }
+  .valg .b-fjern[aria-pressed=true] { background: var(--rød-bg); border-color: var(--rød); color: var(--rød); font-weight: 600; }
+  .valg .b-endre[aria-pressed=true] { border-color: var(--blå); color: var(--blå); }
+  input[type=text] { width: 100%; font: inherit; color: var(--tekst); background: var(--bg); border: 1px solid var(--kant); border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
+  input[type=text]:focus { outline: 2px solid var(--blå); outline-offset: -1px; }
+  .ny { display: flex; gap: 6px; align-items: center; }
+  .ny input { margin-top: 0; }
+  .ny-liste { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+  .fjern-ny { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--kant); background: transparent; color: var(--dempet); cursor: pointer; }
+  .legg-til { border-style: dashed; }
+  .tema { background: var(--kort); border: 1px solid var(--kant); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+  .tema label { display: block; font-size: 12px; color: var(--dempet); margin-top: 8px; }
+  .tema label input { margin-top: 2px; }
+  .tema .ny-liste { margin-top: 10px; }
+  .linje-mellom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .bunn { position: fixed; left: 0; right: 0; bottom: 0; background: var(--kort); border-top: 1px solid var(--kant);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -6px 20px rgba(0,0,0,.08); }
+  .bunn-inner { max-width: 760px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+  .tall { font-size: 13px; color: var(--dempet); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .tall b { color: var(--tekst); }
+  .knapper { display: flex; gap: 8px; }
+  .hoved { font: inherit; font-weight: 600; border: none; border-radius: 999px; padding: 9px 18px; background: var(--tekst); color: var(--bg); cursor: pointer; }
+  #resultat { margin-top: 30px; }
+  #resultat textarea { width: 100%; min-height: 240px; font: 13px/1.5 ui-monospace, Consolas, monospace; color: var(--tekst); background: var(--kort); border: 1px solid var(--kant); border-radius: 10px; padding: 12px; }
+  .melding { color: var(--grønn); font-weight: 600; }
 </style>
 </head>
 <body>
 <div class="side">
-  <header>
-    <h1>Sjaman GPT – innspillingsliste</h1>
-    <div class="meta"><span><b>160</b> replikker inne nå</span><span>Dato: ____________</span><span>Stemme: ______________________</span></div>
-  </header>
+  <h1>Sjaman GPT – innspillingsliste</h1>
+  <p class="ingress">160 replikker inne nå. Alt du gjør her lagres automatisk i denne nettleseren.</p>
   <div class="hjelp">
-    <b>Slik bruker dere lista</b>
+    <b>Slik gjør du</b>
     <ol>
-      <li>Kryss av <b>Behold</b> eller <b>Fjern</b> for hver replikk.</li>
-      <li>Vil dere endre ordlyden, skriv den nye teksten under <b>Endring / notat</b>.</li>
-      <li>Skriv nye replikker på de tomme linjene nederst i hvert tema.</li>
-      <li>Under opptak: si <b>filnavnet</b> høyt, ta en pause på minst ett sekund, si replikken, og ta en ny pause.</li>
+      <li>Trykk <b>Behold</b> eller <b>Fjern</b> på hver replikk.</li>
+      <li><b>Endre</b> lar deg skrive en ny ordlyd.</li>
+      <li><b>＋ Legg til replikk</b> nederst i hvert tema, eller <b>＋ Nytt tema</b> helt nederst.</li>
+      <li>Når du er ferdig: trykk <b>Kopier endringer</b> og lim inn i chatten.</li>
     </ol>
-    <button class="knapp skjul-utskrift" onclick="print()">Skriv ut</button>
   </div>
-  
-  <section>
-    <h2>Generelle svar <small>48 replikker</small></h2>
-    <p class="under">Brukes når spørsmålet ikke passer noe tema.</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">01</td>
-        <td class="replikk">Er ute og henter rein. Tilbake snart. Eller til våren.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">02</td>
-        <td class="replikk">Det er påske i Kautokeino. Jeg er på tre bryllup og fire konfirmasjoner samtidig.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">03</td>
-        <td class="replikk">Bidosen står på komfyren. Man forlater ikke en bidos.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">04</td>
-        <td class="replikk">Det er kalvmerking. Jeg har kniven i én hånd og en kalv i den andre.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">05</td>
-        <td class="replikk">Jeg kaster lasso. Jeg har bommet 14 ganger. Dette er spørsmål nummer 15.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">06</td>
-        <td class="replikk">Flokken krysset grensen til Sverige. Nå trenger jeg tolk for å hente dem.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">07</td>
-        <td class="replikk">Jeg joiket spørsmålet ditt. Nå har det blitt en sang og kan ikke besvares.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">08</td>
-        <td class="replikk">In dieđe. Det betyr «jeg vet ikke». Det er svaret på alt.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">09</td>
-        <td class="replikk">Jeg finner ikke beltet til kofta. Uten belte svarer jeg ikke.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">10</td>
-        <td class="replikk">Jeg har akkurat lagt kaffeost i kaffen. Den må få tid.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">11</td>
-        <td class="replikk">Gjeterhunden spiste svaret. Han er ikke lei seg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">12</td>
-        <td class="replikk">Jeg må ringe resten av siidaen før jeg kan svare. Ingen av dem har dekning.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">13</td>
-        <td class="replikk">Det er 11 mil til nærmeste dekning. Jeg kjører dit og svarer i morgen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">14</td>
-        <td class="replikk">Jeg er på butikken i Kautokeino. Alle jeg kjenner er her, så det tar fire timer.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">15</td>
-        <td class="replikk">Snøscooteren står fast i en myr. Det er november. Ikke spør.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">16</td>
-        <td class="replikk">Jeg teller reinflokken. Jeg har kommet til 3. Det er 400 igjen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">17</td>
-        <td class="replikk">Det står en rein foran tastaturet. Han flytter seg ikke.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">18</td>
-        <td class="replikk">Nordlyset er ute. Alle henvendelser settes på vent.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">19</td>
-        <td class="replikk">Det er minus 40. Svaret frøs fast på vei ut av munnen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">20</td>
-        <td class="replikk">Vinden tok svaret. Det er sikkert i Sverige nå.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">21</td>
-        <td class="replikk">Åndene har streik. De krever mer kaffe.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">22</td>
-        <td class="replikk">Jeg leste kaffegruten. Det står bare «kjøp mer kaffe».</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">23</td>
-        <td class="replikk">Lavvoen blåste bort. Jeg må finne den før jeg kan svare.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">24</td>
-        <td class="replikk">Bestemor ringer. Man legger ikke på for bestemor.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">25</td>
-        <td class="replikk">Kontortida er tirsdager fra 10.00 til 10.05. Du kom for sent.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">26</td>
-        <td class="replikk">Du er nummer 4 812 i køen. Forventet ventetid: én flytting.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">27</td>
-        <td class="replikk">Svaret er faktisk veldig enkelt. Det er — nei, glem det.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">28</td>
-        <td class="replikk">Godt spørsmål. Veldig godt spørsmål. … Jeg må gå.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">29</td>
-        <td class="replikk">Jeg vet svaret, men du er ikke klar for det.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">30</td>
-        <td class="replikk">Du har nådd grensen for svar i dag. Oppgrader til Sjaman Pluss for 3 tørrfisk i måneden.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">31</td>
-        <td class="replikk">Som en sjaman-språkmodell kan jeg ikke svare på det.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">32</td>
-        <td class="replikk">Serverne er overbelastet. Serveren er en rein, og han er sliten.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">33</td>
-        <td class="replikk">Jeg genererer svaret ditt nå … 1 % … 1 % … 1 % …</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">34</td>
-        <td class="replikk">Har du prøvd å google det?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">35</td>
-        <td class="replikk">Nei.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">36</td>
-        <td class="replikk">Jokeren stenger seks, jeg måtte gå for å rekke den.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-01</td>
-        <td class="replikk">Hm.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-02</td>
-        <td class="replikk">Kanskje.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-03</td>
-        <td class="replikk">Hæ?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-04</td>
-        <td class="replikk">Spør bestemor.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-05</td>
-        <td class="replikk">Ikke nå.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-06</td>
-        <td class="replikk">Det får vi se til våren.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-07</td>
-        <td class="replikk">Jeg tenker. Ikke stress meg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-08</td>
-        <td class="replikk">Ja. Nei. Kanskje.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-09</td>
-        <td class="replikk">Prøv igjen etter flyttinga.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-10</td>
-        <td class="replikk">Hysj. Jeg ser på nordlyset.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-11</td>
-        <td class="replikk">Interessant. Uansett.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">generisk-12</td>
-        <td class="replikk">Det vet reinen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Jenter og kjærester <small>9 replikker</small></h2>
-    <p class="under">Utløses av: jente, dame, dama, kjæreste, date, flørt, singel, single, forelsk, crush</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-01</td>
-        <td class="replikk">Vent litt. Jenter, sa du? Jeg legger fra meg lassoen. Fortell mer.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-02</td>
-        <td class="replikk">Endelig et ordentlig spørsmål. Reinen kan vente.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-03</td>
-        <td class="replikk">Er hun fra Kautokeino? Da kjenner jeg sikkert bestemoren hennes.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-04</td>
-        <td class="replikk">Har hun egen rein? Det er det eneste som betyr noe.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-05</td>
-        <td class="replikk">Jeg tar på meg den fine kofta. Hvor er hun?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-06</td>
-        <td class="replikk">Hysj. Jeg har slått av scooteren. Jeg hører.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-07</td>
-        <td class="replikk">Spør om hun liker bidos. Hvis ja: fri.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-08</td>
-        <td class="replikk">Jeg skal joike til henne. Det har aldri slått feil. Det har alltid slått feil.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jenter-09</td>
-        <td class="replikk">Rart. Nå fikk jeg plutselig full dekning.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Hvor mange rein har du? (frekt spørsmål) <small>6 replikker</small></h2>
-    <p class="under">Utløses av: hvor mange rein, hvor mye rein, antall rein, hvor stor flokk, hvor stor er flokken, hvor mange dyr</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">antall-01</td>
-        <td class="replikk">Hvor mye tjener du?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">antall-02</td>
-        <td class="replikk">Uff.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">antall-03</td>
-        <td class="replikk">Jeg later som jeg ikke hørte det.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">antall-04</td>
-        <td class="replikk">Vis meg lønnsslippen din først.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">antall-05</td>
-        <td class="replikk">Bestemor hørte det der.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">antall-06</td>
-        <td class="replikk">Neste spørsmål.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Rein <small>1 replikk</small></h2>
-    <p class="under">Utløses av: rein, flokk, lasso, kalv, simle, bukk, rudolf</p>
-    <p class="under">+ 7 av de generelle svarene brukes også her (står bare én gang i lista).</p>
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">spesial-rein</td>
-        <td class="replikk">Ikke snakk om reinen min. Han er sensitiv.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Meningen med livet <small>4 replikker</small></h2>
-    <p class="under">Utløses av: meningen med livet, mening med livet, livets mening</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">livet-01</td>
-        <td class="replikk">Kaffe.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">livet-02</td>
-        <td class="replikk">400.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">livet-03</td>
-        <td class="replikk">Bestemor vet. Hun sier det ikke.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">livet-04</td>
-        <td class="replikk">Spør meg etter kalvmerkinga.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Hvordan går det? <small>5 replikker</small></h2>
-    <p class="under">Utløses av: hvordan går det, hvordan har du det, står til, går det bra, hva skjer</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">gardet-01</td>
-        <td class="replikk">Kaldt.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">gardet-02</td>
-        <td class="replikk">Kunne vært verre. Kunne vært sommer.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">gardet-03</td>
-        <td class="replikk">Jeg har kaffe. Så bra.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">gardet-04</td>
-        <td class="replikk">Scooteren står fast. Ellers bra.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">gardet-05</td>
-        <td class="replikk">Hvem vil vite det?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Hvem er du? <small>3 replikker</small></h2>
-    <p class="under">Utløses av: hvem er du, hva heter du, hva er du</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hvem-01</td>
-        <td class="replikk">Sjamanen. Neste.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hvem-02</td>
-        <td class="replikk">Det vet bare reinen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hvem-03</td>
-        <td class="replikk">Hvem er du?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Hilsen <small>6 replikker</small></h2>
-    <p class="under">Utløses av: hei, hallo, halla, heisann, god morgen, god dag, god kveld, bures, buorre, yo</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hei-01</td>
-        <td class="replikk">Bures.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">spesial-hei</td>
-        <td class="replikk">Buorre beaivi! … Det var alt.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hei-02</td>
-        <td class="replikk">Hei. Jeg er opptatt.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hei-03</td>
-        <td class="replikk">Hvem er dette?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hei-04</td>
-        <td class="replikk">Hei. Ha det.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hei-05</td>
-        <td class="replikk">Hallo? … Hallo? Du brytes opp.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Ha det <small>4 replikker</small></h2>
-    <p class="under">Utløses av: ha det, hade, snakkes, god natt, bye, vi ses</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hadet-01</td>
-        <td class="replikk">Endelig.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hadet-02</td>
-        <td class="replikk">Lukk døra etter deg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hadet-03</td>
-        <td class="replikk">Snakkes. Eller ikke.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hadet-04</td>
-        <td class="replikk">Giitu for besøket.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Takk <small>4 replikker</small></h2>
-    <p class="under">Utløses av: takk, tusen takk, giitu</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">spesial-takk</td>
-        <td class="replikk">Giitu for spørsmålet. Svar kommer aldri.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">takk-01</td>
-        <td class="replikk">For hva?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">takk-02</td>
-        <td class="replikk">Jeg gjorde ingenting.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">takk-03</td>
-        <td class="replikk">Det blir 3 tørrfisk.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Skole og lekser <small>5 replikker</small></h2>
-    <p class="under">Utløses av: lekse, matte, skole, innlevering, eksamen, oppgave, lærer</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">skole-01</td>
-        <td class="replikk">Gjør den selv.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">skole-02</td>
-        <td class="replikk">Svaret er 400.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">skole-03</td>
-        <td class="replikk">Kopier sidemannen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">skole-04</td>
-        <td class="replikk">Jeg gikk ikke på skolen. Jeg gikk med flokken.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">skole-05</td>
-        <td class="replikk">Si at gjeterhunden spiste den.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Kaffe <small>4 replikker</small></h2>
-    <p class="under">Utløses av: kaffe, kaffi, termos</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">kaffe-01</td>
-        <td class="replikk">Endelig noen som forstår meg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">kaffe-02</td>
-        <td class="replikk">Svart.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">kaffe-03</td>
-        <td class="replikk">Jeg har tre termoser. Ingen av dem er til deg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">kaffe-04</td>
-        <td class="replikk">Med kaffeost. Ellers er det ikke kaffe.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Mat <small>5 replikker</small></h2>
-    <p class="under">Utløses av: mat, sulten, middag, lunsj, frokost, pizza, kebab, taco, bidos</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">mat-01</td>
-        <td class="replikk">Bidos.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">mat-02</td>
-        <td class="replikk">Tørrfisk.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">mat-03</td>
-        <td class="replikk">Det er kaffeost i kjøleskapet. Ikke rør den.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">mat-04</td>
-        <td class="replikk">Jeg spiser nå. Ring senere.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">mat-05</td>
-        <td class="replikk">Pizza? Her? Ha.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Vær <small>5 replikker</small></h2>
-    <p class="under">Utløses av: været, værmelding, værvarsel, kaldt, grader, snør, nordlys</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">vaer-01</td>
-        <td class="replikk">Kaldt.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">vaer-02</td>
-        <td class="replikk">Se ut av vinduet.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">vaer-03</td>
-        <td class="replikk">Det blir vær.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">vaer-04</td>
-        <td class="replikk">Minus 30 og fint.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">vaer-05</td>
-        <td class="replikk">Spør reinen. Han står ute.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Scooter <small>4 replikker</small></h2>
-    <p class="under">Utløses av: scooter, snøscooter, skuter</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">scooter-01</td>
-        <td class="replikk">Den står fast.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">scooter-02</td>
-        <td class="replikk">Den starter ikke.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">scooter-03</td>
-        <td class="replikk">Tom for bensin. Igjen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">scooter-04</td>
-        <td class="replikk">Ikke snakk om scooteren.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Joik og sang <small>3 replikker</small></h2>
-    <p class="under">Utløses av: joik, synge, syng, sang</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">joik-01</td>
-        <td class="replikk">Jeg joiker ikke på bestilling.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">joik-02</td>
-        <td class="replikk">Det koster 5 tørrfisk.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">joik-03</td>
-        <td class="replikk">Nei.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Sverige <small>3 replikker</small></h2>
-    <p class="under">Utløses av: sverige, svensk, svenske</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sverige-01</td>
-        <td class="replikk">Ikke snakk om dem.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sverige-02</td>
-        <td class="replikk">Flokken min er der. Den kommer ikke tilbake.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sverige-03</td>
-        <td class="replikk">Hva? Jeg forstår ikke svensk.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Byer sørpå <small>3 replikker</small></h2>
-    <p class="under">Utløses av: oslo, bergen, trondheim, stavanger</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sorpa-01</td>
-        <td class="replikk">Der har de ikke rein. Bare duer.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sorpa-02</td>
-        <td class="replikk">Det er for langt sør.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sorpa-03</td>
-        <td class="replikk">Har de dekning der?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Hjemme (Kautokeino, Karasjok, Finnmark) <small>3 replikker</small></h2>
-    <p class="under">Utløses av: kautokeino, guovdageaidnu, karasjok, finnmark</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjemme-01</td>
-        <td class="replikk">Hils bestemor.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjemme-02</td>
-        <td class="replikk">Jeg er der. Jeg er alltid der.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjemme-03</td>
-        <td class="replikk">Hvem er din familie?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Jul <small>3 replikker</small></h2>
-    <p class="under">Utløses av: jule, jula, julaften, nisse</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jul-01</td>
-        <td class="replikk">Nissen låner reinen min hvert år. Han har aldri levert dem tilbake.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jul-02</td>
-        <td class="replikk">Jeg teller rein i jula.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">jul-03</td>
-        <td class="replikk">Ikke nevn nissen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>AI og ChatGPT <small>3 replikker</small></h2>
-    <p class="under">Utløses av: chatgpt, gpt, ai, robot, kunstig intelligens</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">ai-01</td>
-        <td class="replikk">ChatGPT er svogeren min. Vi snakker ikke sammen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">ai-02</td>
-        <td class="replikk">Jeg er ikke en robot. Jeg er bare treg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">ai-03</td>
-        <td class="replikk">Jeg kjører på én rein og en termos.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Penger <small>3 replikker</small></h2>
-    <p class="under">Utløses av: penger, penga, lønn, vipps, låne, betale</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">penger-01</td>
-        <td class="replikk">Vipps meg først.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">penger-02</td>
-        <td class="replikk">Jeg har 3 tørrfisk. De er ikke til salgs.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">penger-03</td>
-        <td class="replikk">Nei.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Hjelp <small>4 replikker</small></h2>
-    <p class="under">Utløses av: hjelp, hjelpe</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjelp-01</td>
-        <td class="replikk">Nei.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjelp-02</td>
-        <td class="replikk">Ring 113.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjelp-03</td>
-        <td class="replikk">Jeg kan ikke engang hjelpe meg selv.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">hjelp-04</td>
-        <td class="replikk">Har du prøvd å slå den av og på?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Klokka <small>3 replikker</small></h2>
-    <p class="under">Utløses av: klokka, klokken, hvilken dag</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">klokka-01</td>
-        <td class="replikk">Kaffetid.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">klokka-02</td>
-        <td class="replikk">Det er mørketid. Klokka spiller ingen rolle.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">klokka-03</td>
-        <td class="replikk">Sent.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Unnskyld <small>3 replikker</small></h2>
-    <p class="under">Utløses av: unnskyld, sorry, beklager</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sorry-01</td>
-        <td class="replikk">Greit.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sorry-02</td>
-        <td class="replikk">For sent.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">sorry-03</td>
-        <td class="replikk">Bestemor tilgir deg. Ikke jeg.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Latter <small>3 replikker</small></h2>
-    <p class="under">Utløses av: haha, hehe, lol, 😂</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">haha-01</td>
-        <td class="replikk">Hva ler du av?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">haha-02</td>
-        <td class="replikk">Det var ikke en vits.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">haha-03</td>
-        <td class="replikk">Hysj.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Banning <small>3 replikker</small></h2>
-    <p class="under">Utløses av: faen, helvete, dritt, jævla, fuck</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bann-01</td>
-        <td class="replikk">Hysj. Reinen hører.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bann-02</td>
-        <td class="replikk">Vask munnen med snø.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bann-03</td>
-        <td class="replikk">Jeg sier det til bestemor.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Bilder <small>9 replikker</small></h2>
-    <p class="under">Når noen sender et bilde.</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-01</td>
-        <td class="replikk">Er det en rein?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-02</td>
-        <td class="replikk">Det der er ikke en rein.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-03</td>
-        <td class="replikk">Jeg ser ingenting. Det er mørketid.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-04</td>
-        <td class="replikk">Bildet laster … 1 % … 1 % …</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-05</td>
-        <td class="replikk">Jeg har sett bedre. Jeg har sett nordlyset.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-06</td>
-        <td class="replikk">Fint. Hva skal jeg med det?</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-07</td>
-        <td class="replikk">Jeg viser det til bestemor.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-08</td>
-        <td class="replikk">Hm. Uskarpt.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">bilde-09</td>
-        <td class="replikk">Jeg henger det opp i lavvoen.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Pause (08–16) <small>1 replikk</small></h2>
-    <p class="under">Når noen spør i arbeidstida.</p>
-    
-    <div class="tabell"><table>
-      <thead><tr><th>Behold</th><th>Fjern</th><th>Filnavn</th><th>Replikk</th><th>Endring / notat</th></tr></thead>
-      <tbody>
-      <tr>
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil">pause</td>
-        <td class="replikk">Sjamanen har pause fra 08 til 16. Prøv igjen klokka 16.01.</td>
-        <td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr>
-      <tr class="ny">
-        <td class="boks"><span></span></td><td class="boks"><span></span></td>
-        <td class="fil"></td><td class="replikk"></td><td class="notat"></td>
-      </tr></tbody>
-    </table></div>
-  </section>
-
-  <section>
-    <h2>Ekstra lyder (uten tekst) <small>forslag</small></h2>
-    <p class="under">Rene lyder som kan brukes som svar på hva som helst. Kryss av de dere vil ta opp.</p>
-    <div class="tabell"><table>
-      <thead><tr><th>Ta opp</th><th>Dropp</th><th>Filnavn</th><th>Lyd</th><th>Notat</th></tr></thead>
-      <tbody>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>Sukk</i></td><td class="notat"></td></tr>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>«Hæ?»</i></td><td class="notat"></td></tr>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>Latter</i></td><td class="notat"></td></tr>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>Joikestump</i></td><td class="notat"></td></tr>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>Scooter som ikke vil starte</i></td><td class="notat"></td></tr>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>Gjesp</i></td><td class="notat"></td></tr>
-      <tr><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"><i>Slurper kaffe</i></td><td class="notat"></td></tr>
-      <tr class="ny"><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"></td><td class="notat"></td></tr>
-      <tr class="ny"><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"></td><td class="notat"></td></tr>
-      <tr class="ny"><td class="boks"><span></span></td><td class="boks"><span></span></td>
-      <td class="fil"></td><td class="replikk"></td><td class="notat"></td></tr></tbody>
-    </table></div>
-  </section>
-  <section class="ny-side">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <section id="temaer-seksjon">
     <h2>Nye temaer</h2>
-    <p class="under">Skriv temaet, hvilke ord som skal utløse det, og replikkene.</p>
-    
-    <div class="nytt-tema">
-      <div class="linje"><b>Tema:</b></div>
-      <div class="linje"><b>Ord som utløser:</b></div>
-      <div class="tabell"><table><thead><tr><th>Filnavn</th><th>Replikk</th></tr></thead>
-      <tbody><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr></tbody></table></div>
-    </div>
-    <div class="nytt-tema">
-      <div class="linje"><b>Tema:</b></div>
-      <div class="linje"><b>Ord som utløser:</b></div>
-      <div class="tabell"><table><thead><tr><th>Filnavn</th><th>Replikk</th></tr></thead>
-      <tbody><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr></tbody></table></div>
-    </div>
-    <div class="nytt-tema">
-      <div class="linje"><b>Tema:</b></div>
-      <div class="linje"><b>Ord som utløser:</b></div>
-      <div class="tabell"><table><thead><tr><th>Filnavn</th><th>Replikk</th></tr></thead>
-      <tbody><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr><tr class="ny"><td class="fil"></td><td class="replikk"></td></tr></tbody></table></div>
-    </div>
+    <p class="under">Et tema = ord som utløser det + replikker sjamanen svarer med.</p>
+    <div id="temaer"></div>
+    <button class="legg-til" id="nyttTema">＋ Nytt tema</button>
+  </section>
+  <section id="resultat" hidden>
+    <h2>Endringer</h2>
+    <p class="under"><span class="melding" id="kopiMelding"></span> Lim inn teksten under i chatten.</p>
+    <textarea id="resultatTekst" readonly></textarea>
   </section>
 </div>
+
+<div class="bunn">
+  <div class="bunn-inner">
+    <div class="tall" id="tall"></div>
+    <div class="knapper">
+      <button class="liten" id="nullstill">Nullstill</button>
+      <button class="hoved" id="kopier">Kopier endringer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [{"id":"generelt","tittel":"Generelle svar","under":"Når spørsmålet ikke passer noe tema","rader":[{"fil":"01","tekst":"Er ute og henter rein. Tilbake snart. Eller til våren.","bareLyd":false},{"fil":"02","tekst":"Det er påske i Kautokeino. Jeg er på tre bryllup og fire konfirmasjoner samtidig.","bareLyd":false},{"fil":"03","tekst":"Bidosen står på komfyren. Man forlater ikke en bidos.","bareLyd":false},{"fil":"04","tekst":"Det er kalvmerking. Jeg har kniven i én hånd og en kalv i den andre.","bareLyd":false},{"fil":"05","tekst":"Jeg kaster lasso. Jeg har bommet 14 ganger. Dette er spørsmål nummer 15.","bareLyd":false},{"fil":"06","tekst":"Flokken krysset grensen til Sverige. Nå trenger jeg tolk for å hente dem.","bareLyd":false},{"fil":"07","tekst":"Jeg joiket spørsmålet ditt. Nå har det blitt en sang og kan ikke besvares.","bareLyd":false},{"fil":"08","tekst":"In dieđe. Det betyr «jeg vet ikke». Det er svaret på alt.","bareLyd":false},{"fil":"09","tekst":"Jeg finner ikke beltet til kofta. Uten belte svarer jeg ikke.","bareLyd":false},{"fil":"10","tekst":"Jeg har akkurat lagt kaffeost i kaffen. Den må få tid.","bareLyd":false},{"fil":"11","tekst":"Gjeterhunden spiste svaret. Han er ikke lei seg.","bareLyd":false},{"fil":"12","tekst":"Jeg må ringe resten av siidaen før jeg kan svare. Ingen av dem har dekning.","bareLyd":false},{"fil":"13","tekst":"Det er 11 mil til nærmeste dekning. Jeg kjører dit og svarer i morgen.","bareLyd":false},{"fil":"14","tekst":"Jeg er på butikken i Kautokeino. Alle jeg kjenner er her, så det tar fire timer.","bareLyd":false},{"fil":"15","tekst":"Snøscooteren står fast i en myr. Det er november. Ikke spør.","bareLyd":false},{"fil":"16","tekst":"Jeg teller reinflokken. Jeg har kommet til 3. Det er 400 igjen.","bareLyd":false},{"fil":"17","tekst":"Det står en rein foran tastaturet. Han flytter seg ikke.","bareLyd":false},{"fil":"18","tekst":"Nordlyset er ute. Alle henvendelser settes på vent.","bareLyd":false},{"fil":"19","tekst":"Det er minus 40. Svaret frøs fast på vei ut av munnen.","bareLyd":false},{"fil":"20","tekst":"Vinden tok svaret. Det er sikkert i Sverige nå.","bareLyd":false},{"fil":"21","tekst":"Åndene har streik. De krever mer kaffe.","bareLyd":false},{"fil":"22","tekst":"Jeg leste kaffegruten. Det står bare «kjøp mer kaffe».","bareLyd":false},{"fil":"23","tekst":"Lavvoen blåste bort. Jeg må finne den før jeg kan svare.","bareLyd":false},{"fil":"24","tekst":"Bestemor ringer. Man legger ikke på for bestemor.","bareLyd":false},{"fil":"25","tekst":"Kontortida er tirsdager fra 10.00 til 10.05. Du kom for sent.","bareLyd":false},{"fil":"26","tekst":"Du er nummer 4 812 i køen. Forventet ventetid: én flytting.","bareLyd":false},{"fil":"27","tekst":"Svaret er faktisk veldig enkelt. Det er — nei, glem det.","bareLyd":false},{"fil":"28","tekst":"Godt spørsmål. Veldig godt spørsmål. … Jeg må gå.","bareLyd":false},{"fil":"29","tekst":"Jeg vet svaret, men du er ikke klar for det.","bareLyd":false},{"fil":"30","tekst":"Du har nådd grensen for svar i dag. Oppgrader til Sjaman Pluss for 3 tørrfisk i måneden.","bareLyd":false},{"fil":"31","tekst":"Som en sjaman-språkmodell kan jeg ikke svare på det.","bareLyd":false},{"fil":"32","tekst":"Serverne er overbelastet. Serveren er en rein, og han er sliten.","bareLyd":false},{"fil":"33","tekst":"Jeg genererer svaret ditt nå … 1 % … 1 % … 1 % …","bareLyd":false},{"fil":"34","tekst":"Har du prøvd å google det?","bareLyd":false},{"fil":"35","tekst":"Nei.","bareLyd":false},{"fil":"36","tekst":"Jokeren stenger seks, jeg måtte gå for å rekke den.","bareLyd":false},{"fil":"generisk-01","tekst":"Hm.","bareLyd":false},{"fil":"generisk-02","tekst":"Kanskje.","bareLyd":false},{"fil":"generisk-03","tekst":"Hæ?","bareLyd":false},{"fil":"generisk-04","tekst":"Spør bestemor.","bareLyd":false},{"fil":"generisk-05","tekst":"Ikke nå.","bareLyd":false},{"fil":"generisk-06","tekst":"Det får vi se til våren.","bareLyd":false},{"fil":"generisk-07","tekst":"Jeg tenker. Ikke stress meg.","bareLyd":false},{"fil":"generisk-08","tekst":"Ja. Nei. Kanskje.","bareLyd":false},{"fil":"generisk-09","tekst":"Prøv igjen etter flyttinga.","bareLyd":false},{"fil":"generisk-10","tekst":"Hysj. Jeg ser på nordlyset.","bareLyd":false},{"fil":"generisk-11","tekst":"Interessant. Uansett.","bareLyd":false},{"fil":"generisk-12","tekst":"Det vet reinen.","bareLyd":false}]},{"id":"tema0","tittel":"Jenter og kjærester","under":"Utløses av: jente, dame, dama, kjæreste, date, flørt, singel, single, forelsk, crush","rader":[{"fil":"jenter-01","tekst":"Vent litt. Jenter, sa du? Jeg legger fra meg lassoen. Fortell mer.","bareLyd":false},{"fil":"jenter-02","tekst":"Endelig et ordentlig spørsmål. Reinen kan vente.","bareLyd":false},{"fil":"jenter-03","tekst":"Er hun fra Kautokeino? Da kjenner jeg sikkert bestemoren hennes.","bareLyd":false},{"fil":"jenter-04","tekst":"Har hun egen rein? Det er det eneste som betyr noe.","bareLyd":false},{"fil":"jenter-05","tekst":"Jeg tar på meg den fine kofta. Hvor er hun?","bareLyd":false},{"fil":"jenter-06","tekst":"Hysj. Jeg har slått av scooteren. Jeg hører.","bareLyd":false},{"fil":"jenter-07","tekst":"Spør om hun liker bidos. Hvis ja: fri.","bareLyd":false},{"fil":"jenter-08","tekst":"Jeg skal joike til henne. Det har aldri slått feil. Det har alltid slått feil.","bareLyd":false},{"fil":"jenter-09","tekst":"Rart. Nå fikk jeg plutselig full dekning.","bareLyd":false}]},{"id":"tema1","tittel":"Hvor mange rein har du?","under":"Utløses av: hvor mange rein, hvor mye rein, antall rein, hvor stor flokk, hvor stor er flokken, hvor mange dyr","rader":[{"fil":"antall-01","tekst":"Hvor mye tjener du?","bareLyd":false},{"fil":"antall-02","tekst":"Uff.","bareLyd":false},{"fil":"antall-03","tekst":"Jeg later som jeg ikke hørte det.","bareLyd":false},{"fil":"antall-04","tekst":"Vis meg lønnsslippen din først.","bareLyd":false},{"fil":"antall-05","tekst":"Bestemor hørte det der.","bareLyd":false},{"fil":"antall-06","tekst":"Neste spørsmål.","bareLyd":false}]},{"id":"tema2","tittel":"Rein","under":"Utløses av: rein, flokk, lasso, kalv, simle, bukk, rudolf · 7 generelle svar brukes også her (står bare én gang)","rader":[{"fil":"spesial-rein","tekst":"Ikke snakk om reinen min. Han er sensitiv.","bareLyd":false}]},{"id":"tema3","tittel":"Meningen med livet","under":"Utløses av: meningen med livet, mening med livet, livets mening","rader":[{"fil":"livet-01","tekst":"Kaffe.","bareLyd":false},{"fil":"livet-02","tekst":"400.","bareLyd":false},{"fil":"livet-03","tekst":"Bestemor vet. Hun sier det ikke.","bareLyd":false},{"fil":"livet-04","tekst":"Spør meg etter kalvmerkinga.","bareLyd":false}]},{"id":"tema4","tittel":"Hvordan går det?","under":"Utløses av: hvordan går det, hvordan har du det, står til, går det bra, hva skjer","rader":[{"fil":"gardet-01","tekst":"Kaldt.","bareLyd":false},{"fil":"gardet-02","tekst":"Kunne vært verre. Kunne vært sommer.","bareLyd":false},{"fil":"gardet-03","tekst":"Jeg har kaffe. Så bra.","bareLyd":false},{"fil":"gardet-04","tekst":"Scooteren står fast. Ellers bra.","bareLyd":false},{"fil":"gardet-05","tekst":"Hvem vil vite det?","bareLyd":false}]},{"id":"tema5","tittel":"Hvem er du?","under":"Utløses av: hvem er du, hva heter du, hva er du","rader":[{"fil":"hvem-01","tekst":"Sjamanen. Neste.","bareLyd":false},{"fil":"hvem-02","tekst":"Det vet bare reinen.","bareLyd":false},{"fil":"hvem-03","tekst":"Hvem er du?","bareLyd":false}]},{"id":"tema6","tittel":"Hilsen","under":"Utløses av: hei, hallo, halla, heisann, god morgen, god dag, god kveld, bures, buorre, yo","rader":[{"fil":"hei-01","tekst":"Bures.","bareLyd":false},{"fil":"spesial-hei","tekst":"Buorre beaivi! … Det var alt.","bareLyd":false},{"fil":"hei-02","tekst":"Hei. Jeg er opptatt.","bareLyd":false},{"fil":"hei-03","tekst":"Hvem er dette?","bareLyd":false},{"fil":"hei-04","tekst":"Hei. Ha det.","bareLyd":false},{"fil":"hei-05","tekst":"Hallo? … Hallo? Du brytes opp.","bareLyd":false}]},{"id":"tema7","tittel":"Ha det","under":"Utløses av: ha det, hade, snakkes, god natt, bye, vi ses","rader":[{"fil":"hadet-01","tekst":"Endelig.","bareLyd":false},{"fil":"hadet-02","tekst":"Lukk døra etter deg.","bareLyd":false},{"fil":"hadet-03","tekst":"Snakkes. Eller ikke.","bareLyd":false},{"fil":"hadet-04","tekst":"Giitu for besøket.","bareLyd":false}]},{"id":"tema8","tittel":"Takk","under":"Utløses av: takk, tusen takk, giitu","rader":[{"fil":"spesial-takk","tekst":"Giitu for spørsmålet. Svar kommer aldri.","bareLyd":false},{"fil":"takk-01","tekst":"For hva?","bareLyd":false},{"fil":"takk-02","tekst":"Jeg gjorde ingenting.","bareLyd":false},{"fil":"takk-03","tekst":"Det blir 3 tørrfisk.","bareLyd":false}]},{"id":"tema9","tittel":"Skole og lekser","under":"Utløses av: lekse, matte, skole, innlevering, eksamen, oppgave, lærer","rader":[{"fil":"skole-01","tekst":"Gjør den selv.","bareLyd":false},{"fil":"skole-02","tekst":"Svaret er 400.","bareLyd":false},{"fil":"skole-03","tekst":"Kopier sidemannen.","bareLyd":false},{"fil":"skole-04","tekst":"Jeg gikk ikke på skolen. Jeg gikk med flokken.","bareLyd":false},{"fil":"skole-05","tekst":"Si at gjeterhunden spiste den.","bareLyd":false}]},{"id":"tema10","tittel":"Kaffe","under":"Utløses av: kaffe, kaffi, termos","rader":[{"fil":"kaffe-01","tekst":"Endelig noen som forstår meg.","bareLyd":false},{"fil":"kaffe-02","tekst":"Svart.","bareLyd":false},{"fil":"kaffe-03","tekst":"Jeg har tre termoser. Ingen av dem er til deg.","bareLyd":false},{"fil":"kaffe-04","tekst":"Med kaffeost. Ellers er det ikke kaffe.","bareLyd":false}]},{"id":"tema11","tittel":"Mat","under":"Utløses av: mat, sulten, middag, lunsj, frokost, pizza, kebab, taco, bidos","rader":[{"fil":"mat-01","tekst":"Bidos.","bareLyd":false},{"fil":"mat-02","tekst":"Tørrfisk.","bareLyd":false},{"fil":"mat-03","tekst":"Det er kaffeost i kjøleskapet. Ikke rør den.","bareLyd":false},{"fil":"mat-04","tekst":"Jeg spiser nå. Ring senere.","bareLyd":false},{"fil":"mat-05","tekst":"Pizza? Her? Ha.","bareLyd":false}]},{"id":"tema12","tittel":"Vær","under":"Utløses av: været, værmelding, værvarsel, kaldt, grader, snør, nordlys","rader":[{"fil":"vaer-01","tekst":"Kaldt.","bareLyd":false},{"fil":"vaer-02","tekst":"Se ut av vinduet.","bareLyd":false},{"fil":"vaer-03","tekst":"Det blir vær.","bareLyd":false},{"fil":"vaer-04","tekst":"Minus 30 og fint.","bareLyd":false},{"fil":"vaer-05","tekst":"Spør reinen. Han står ute.","bareLyd":false}]},{"id":"tema13","tittel":"Scooter","under":"Utløses av: scooter, snøscooter, skuter","rader":[{"fil":"scooter-01","tekst":"Den står fast.","bareLyd":false},{"fil":"scooter-02","tekst":"Den starter ikke.","bareLyd":false},{"fil":"scooter-03","tekst":"Tom for bensin. Igjen.","bareLyd":false},{"fil":"scooter-04","tekst":"Ikke snakk om scooteren.","bareLyd":false}]},{"id":"tema14","tittel":"Joik og sang","under":"Utløses av: joik, synge, syng, sang","rader":[{"fil":"joik-01","tekst":"Jeg joiker ikke på bestilling.","bareLyd":false},{"fil":"joik-02","tekst":"Det koster 5 tørrfisk.","bareLyd":false},{"fil":"joik-03","tekst":"Nei.","bareLyd":false}]},{"id":"tema15","tittel":"Sverige","under":"Utløses av: sverige, svensk, svenske","rader":[{"fil":"sverige-01","tekst":"Ikke snakk om dem.","bareLyd":false},{"fil":"sverige-02","tekst":"Flokken min er der. Den kommer ikke tilbake.","bareLyd":false},{"fil":"sverige-03","tekst":"Hva? Jeg forstår ikke svensk.","bareLyd":false}]},{"id":"tema16","tittel":"Byer sørpå","under":"Utløses av: oslo, bergen, trondheim, stavanger","rader":[{"fil":"sorpa-01","tekst":"Der har de ikke rein. Bare duer.","bareLyd":false},{"fil":"sorpa-02","tekst":"Det er for langt sør.","bareLyd":false},{"fil":"sorpa-03","tekst":"Har de dekning der?","bareLyd":false}]},{"id":"tema17","tittel":"Hjemme (Kautokeino, Karasjok, Finnmark)","under":"Utløses av: kautokeino, guovdageaidnu, karasjok, finnmark","rader":[{"fil":"hjemme-01","tekst":"Hils bestemor.","bareLyd":false},{"fil":"hjemme-02","tekst":"Jeg er der. Jeg er alltid der.","bareLyd":false},{"fil":"hjemme-03","tekst":"Hvem er din familie?","bareLyd":false}]},{"id":"tema18","tittel":"Jul","under":"Utløses av: jule, jula, julaften, nisse","rader":[{"fil":"jul-01","tekst":"Nissen låner reinen min hvert år. Han har aldri levert dem tilbake.","bareLyd":false},{"fil":"jul-02","tekst":"Jeg teller rein i jula.","bareLyd":false},{"fil":"jul-03","tekst":"Ikke nevn nissen.","bareLyd":false}]},{"id":"tema19","tittel":"AI og ChatGPT","under":"Utløses av: chatgpt, gpt, ai, robot, kunstig intelligens","rader":[{"fil":"ai-01","tekst":"ChatGPT er svogeren min. Vi snakker ikke sammen.","bareLyd":false},{"fil":"ai-02","tekst":"Jeg er ikke en robot. Jeg er bare treg.","bareLyd":false},{"fil":"ai-03","tekst":"Jeg kjører på én rein og en termos.","bareLyd":false}]},{"id":"tema20","tittel":"Penger","under":"Utløses av: penger, penga, lønn, vipps, låne, betale","rader":[{"fil":"penger-01","tekst":"Vipps meg først.","bareLyd":false},{"fil":"penger-02","tekst":"Jeg har 3 tørrfisk. De er ikke til salgs.","bareLyd":false},{"fil":"penger-03","tekst":"Nei.","bareLyd":false}]},{"id":"tema21","tittel":"Hjelp","under":"Utløses av: hjelp, hjelpe","rader":[{"fil":"hjelp-01","tekst":"Nei.","bareLyd":false},{"fil":"hjelp-02","tekst":"Ring 113.","bareLyd":false},{"fil":"hjelp-03","tekst":"Jeg kan ikke engang hjelpe meg selv.","bareLyd":false},{"fil":"hjelp-04","tekst":"Har du prøvd å slå den av og på?","bareLyd":false}]},{"id":"tema22","tittel":"Klokka","under":"Utløses av: klokka, klokken, hvilken dag","rader":[{"fil":"klokka-01","tekst":"Kaffetid.","bareLyd":false},{"fil":"klokka-02","tekst":"Det er mørketid. Klokka spiller ingen rolle.","bareLyd":false},{"fil":"klokka-03","tekst":"Sent.","bareLyd":false}]},{"id":"tema23","tittel":"Unnskyld","under":"Utløses av: unnskyld, sorry, beklager","rader":[{"fil":"sorry-01","tekst":"Greit.","bareLyd":false},{"fil":"sorry-02","tekst":"For sent.","bareLyd":false},{"fil":"sorry-03","tekst":"Bestemor tilgir deg. Ikke jeg.","bareLyd":false}]},{"id":"tema24","tittel":"Latter","under":"Utløses av: haha, hehe, lol, 😂","rader":[{"fil":"haha-01","tekst":"Hva ler du av?","bareLyd":false},{"fil":"haha-02","tekst":"Det var ikke en vits.","bareLyd":false},{"fil":"haha-03","tekst":"Hysj.","bareLyd":false}]},{"id":"tema25","tittel":"Banning","under":"Utløses av: faen, helvete, dritt, jævla, fuck","rader":[{"fil":"bann-01","tekst":"Hysj. Reinen hører.","bareLyd":false},{"fil":"bann-02","tekst":"Vask munnen med snø.","bareLyd":false},{"fil":"bann-03","tekst":"Jeg sier det til bestemor.","bareLyd":false}]},{"id":"bilde","tittel":"Bilder","under":"Når noen sender et bilde","rader":[{"fil":"bilde-01","tekst":"Er det en rein?","bareLyd":false},{"fil":"bilde-02","tekst":"Det der er ikke en rein.","bareLyd":false},{"fil":"bilde-03","tekst":"Jeg ser ingenting. Det er mørketid.","bareLyd":false},{"fil":"bilde-04","tekst":"Bildet laster … 1 % … 1 % …","bareLyd":false},{"fil":"bilde-05","tekst":"Jeg har sett bedre. Jeg har sett nordlyset.","bareLyd":false},{"fil":"bilde-06","tekst":"Fint. Hva skal jeg med det?","bareLyd":false},{"fil":"bilde-07","tekst":"Jeg viser det til bestemor.","bareLyd":false},{"fil":"bilde-08","tekst":"Hm. Uskarpt.","bareLyd":false},{"fil":"bilde-09","tekst":"Jeg henger det opp i lavvoen.","bareLyd":false}]},{"id":"pause","tittel":"Pause (08–16)","under":"Når noen spør i arbeidstida","rader":[{"fil":"pause","tekst":"Sjamanen har pause fra 08 til 16. Prøv igjen klokka 16.01.","bareLyd":false}]},{"id":"ekstra","tittel":"Ekstra lyder (uten tekst)","under":"Forslag – Behold = ta opp, Fjern = dropp","ekstra":true,"rader":[{"fil":"sukk","tekst":"Sukk","bareLyd":true},{"fil":"hae","tekst":"«Hæ?»","bareLyd":true},{"fil":"latter","tekst":"Latter","bareLyd":true},{"fil":"joik","tekst":"Joikestump","bareLyd":true},{"fil":"scooter-start","tekst":"Scooter som ikke vil starte","bareLyd":true},{"fil":"gjesp","tekst":"Gjesp","bareLyd":true},{"fil":"slurp","tekst":"Slurper kaffe","bareLyd":true}]}];
+const NØKKEL = 'sjaman-innspilling-v1';
+let st = { valg: {}, endring: {}, nye: {}, temaer: [] };
+try { st = Object.assign(st, JSON.parse(localStorage.getItem(NØKKEL)) || {}); } catch {}
+function lagre() { try { localStorage.setItem(NØKKEL, JSON.stringify(st)); } catch {} oppdaterTall(); }
+
+const $ = (tag, attr = {}, ...barn) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attr)) {
+    if (k.startsWith('on')) el[k] = v; else if (k === 'text') el.textContent = v; else el.setAttribute(k, v);
+  }
+  el.append(...barn);
+  return el;
+};
+
+function lagRad(r) {
+  const rad = $('div', { class: 'rad' });
+  const tekst = $('div', { class: 'tekst' });
+  if (r.bareLyd) tekst.append($('i', { text: r.tekst || '(bare lyd)' })); else tekst.textContent = r.tekst;
+  const behold = $('button', { class: 'b-behold' }, '✓ Behold');
+  const fjern = $('button', { class: 'b-fjern' }, '✕ Fjern');
+  const endre = $('button', { class: 'b-endre' }, '✎ Endre');
+  const felt = $('input', { type: 'text', placeholder: 'Ny tekst …' });
+  felt.value = st.endring[r.fil] || '';
+  if (r.bareLyd) endre.hidden = true;
+
+  function vis() {
+    const v = st.valg[r.fil];
+    rad.classList.toggle('behold', v === 'behold');
+    rad.classList.toggle('fjern', v === 'fjern');
+    behold.setAttribute('aria-pressed', v === 'behold');
+    fjern.setAttribute('aria-pressed', v === 'fjern');
+    const åpen = !!st.endring[r.fil] || felt.dataset.apen === '1';
+    felt.hidden = !åpen || v === 'fjern';
+    endre.setAttribute('aria-pressed', åpen);
+  }
+  const velg = v => { if (st.valg[r.fil] === v) delete st.valg[r.fil]; else st.valg[r.fil] = v; lagre(); vis(); tegnNav(); };
+  behold.onclick = () => velg('behold');
+  fjern.onclick = () => velg('fjern');
+  endre.onclick = () => {
+    felt.dataset.apen = felt.hidden ? '1' : '';
+    if (!felt.dataset.apen) { delete st.endring[r.fil]; felt.value = ''; lagre(); }
+    if (st.valg[r.fil] === 'fjern') { delete st.valg[r.fil]; lagre(); }
+    vis(); if (!felt.hidden) felt.focus();
+  };
+  felt.oninput = () => {
+    const t = felt.value;
+    if (t.trim()) st.endring[r.fil] = t; else delete st.endring[r.fil];
+    if (t.trim() && !st.valg[r.fil]) { st.valg[r.fil] = 'behold'; vis(); tegnNav(); }
+    lagre();
+  };
+  rad.append($('div', { class: 'topp' }, $('span', { class: 'fil', text: r.fil }), tekst), $('div', { class: 'valg' }, behold, fjern, endre), felt);
+  vis();
+  return rad;
+}
+
+function nyListe(liste, plassholder, påEndring) {
+  const boks = $('div', { class: 'ny-liste' });
+  function tegn(fokusSist) {
+    boks.innerHTML = '';
+    liste.forEach((t, i) => {
+      const felt = $('input', { type: 'text', placeholder: plassholder });
+      felt.value = t;
+      felt.oninput = () => { liste[i] = felt.value; påEndring(); };
+      const x = $('button', { class: 'fjern-ny', title: 'Fjern', onclick: () => { liste.splice(i, 1); påEndring(); tegn(); } }, '✕');
+      boks.append($('div', { class: 'ny' }, felt, x));
+      if (fokusSist && i === liste.length - 1) setTimeout(() => felt.focus());
+    });
+  }
+  tegn();
+  return { boks, leggTil() { liste.push(''); påEndring(); tegn(true); } };
+}
+
+function tegnNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  for (const s of DATA) {
+    const ferdig = s.rader.every(r => st.valg[r.fil]);
+    nav.append($('a', { href: '#' + s.id }, s.tittel, ferdig ? $('span', { class: 'ferdig' }, ' ✓') : ''));
+  }
+  nav.append($('a', { href: '#temaer-seksjon' }, 'Nye temaer'));
+}
+
+function tegnAlt() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  for (const s of DATA) {
+    const sek = $('section', { id: s.id },
+      $('h2', {}, s.tittel, $('small', { text: s.rader.length + (s.rader.length === 1 ? ' replikk' : ' replikker') })),
+      $('p', { class: 'under', text: s.under }));
+    s.rader.forEach(r => sek.append(lagRad(r)));
+    st.nye[s.id] = st.nye[s.id] || [];
+    const ny = nyListe(st.nye[s.id], s.ekstra ? 'Ny lyd, f.eks. «hoster»' : 'Ny replikk …', lagre);
+    sek.append(ny.boks, $('button', { class: 'legg-til', onclick: ny.leggTil }, s.ekstra ? '＋ Legg til lyd' : '＋ Legg til replikk'));
+    main.append(sek);
+  }
+  tegnTemaer();
+  tegnNav();
+  oppdaterTall();
+}
+
+function tegnTemaer(fokusNy) {
+  const boks = document.getElementById('temaer');
+  boks.innerHTML = '';
+  st.temaer.forEach((t, i) => {
+    const tittel = $('input', { type: 'text', placeholder: 'F.eks. Fotball' }); tittel.value = t.tittel || '';
+    tittel.oninput = () => { t.tittel = tittel.value; lagre(); };
+    const ord = $('input', { type: 'text', placeholder: 'F.eks. fotball, kamp, mål' }); ord.value = t.ord || '';
+    ord.oninput = () => { t.ord = ord.value; lagre(); };
+    t.rader = t.rader || [];
+    const ny = nyListe(t.rader, 'Replikk …', lagre);
+    const slett = $('button', { class: 'liten', onclick: () => { st.temaer.splice(i, 1); lagre(); tegnTemaer(); } }, 'Slett tema');
+    boks.append($('div', { class: 'tema' },
+      $('div', { class: 'linje-mellom' }, $('b', { text: 'Nytt tema ' + (i + 1) }), slett),
+      $('label', {}, 'Navn på tema', tittel),
+      $('label', {}, 'Ord som utløser (skill med komma)', ord),
+      ny.boks,
+      $('button', { class: 'legg-til', onclick: ny.leggTil }, '＋ Legg til replikk')));
+    if (fokusNy && i === st.temaer.length - 1) setTimeout(() => tittel.focus());
+  });
+}
+document.getElementById('nyttTema').onclick = () => { st.temaer.push({ tittel: '', ord: '', rader: [''] }); lagre(); tegnTemaer(true); };
+
+function tell() {
+  let behold = 0, fjern = 0, endret = 0, ikke = 0, nye = 0;
+  for (const s of DATA) {
+    for (const r of s.rader) {
+      const v = st.valg[r.fil];
+      if (v === 'behold') behold++; else if (v === 'fjern') fjern++; else ikke++;
+      if (v !== 'fjern' && (st.endring[r.fil] || '').trim()) endret++;
+    }
+    nye += (st.nye[s.id] || []).filter(t => t.trim()).length;
+  }
+  for (const t of st.temaer) nye += (t.rader || []).filter(x => x.trim()).length;
+  return { behold, fjern, endret, ikke, nye };
+}
+function oppdaterTall() {
+  const t = tell();
+  document.getElementById('tall').innerHTML =
+    '<span>Behold <b>' + t.behold + '</b></span><span>Fjern <b>' + t.fjern + '</b></span><span>Endret <b>' + t.endret +
+    '</b></span><span>Nye <b>' + t.nye + '</b></span><span>Ikke valgt <b>' + t.ikke + '</b></span>';
+}
+
+function lagTekst() {
+  const fjern = [], endre = [], nye = [], ekstraJa = [], ekstraNei = [];
+  for (const s of DATA) {
+    for (const r of s.rader) {
+      const v = st.valg[r.fil], e = (st.endring[r.fil] || '').trim();
+      if (s.ekstra) { if (v === 'behold') ekstraJa.push(r.tekst); else if (v === 'fjern') ekstraNei.push(r.tekst); continue; }
+      if (v === 'fjern') fjern.push('- ' + r.fil + ': ' + (r.tekst || '(bare lyd)'));
+      else if (e) endre.push('- ' + r.fil + ': ' + r.tekst + '\n    → ' + e);
+    }
+    const n = (st.nye[s.id] || []).map(t => t.trim()).filter(Boolean);
+    if (n.length) nye.push('[' + s.tittel + ']', ...n.map(t => '- ' + t));
+  }
+  const temaer = [];
+  for (const t of st.temaer) {
+    const r = (t.rader || []).map(x => x.trim()).filter(Boolean);
+    if (!(t.tittel || '').trim() && !r.length) continue;
+    temaer.push('[' + ((t.tittel || '').trim() || 'Uten navn') + '] ord: ' + ((t.ord || '').trim() || '(ingen)'), ...r.map(x => '- ' + x));
+  }
+  const tt = tell();
+  const l = ['SJAMAN GPT – ENDRINGER', 'Behold ' + tt.behold + ' · Fjern ' + tt.fjern + ' · Endret ' + tt.endret + ' · Nye ' + tt.nye + ' · Ikke valgt ' + tt.ikke, ''];
+  const blokk = (navn, linjer) => { if (linjer.length) l.push(navn + ':', ...linjer, ''); };
+  blokk('FJERN', fjern);
+  blokk('ENDRE TEKST', endre);
+  blokk('NYE REPLIKKER', nye);
+  blokk('NYE TEMAER', temaer);
+  if (ekstraJa.length) blokk('EKSTRA LYDER – TA OPP', ekstraJa.map(x => '- ' + x));
+  if (ekstraNei.length) blokk('EKSTRA LYDER – DROPP', ekstraNei.map(x => '- ' + x));
+  if (tt.ikke) l.push('(' + tt.ikke + ' replikker er ikke valgt – de blir stående som de er.)');
+  return l.join('\n').trim();
+}
+
+document.getElementById('kopier').onclick = async () => {
+  const tekst = lagTekst();
+  const res = document.getElementById('resultat');
+  const felt = document.getElementById('resultatTekst');
+  const melding = document.getElementById('kopiMelding');
+  felt.value = tekst; res.hidden = false;
+  try { await navigator.clipboard.writeText(tekst); melding.textContent = 'Kopiert!'; }
+  catch { felt.select(); melding.textContent = 'Marker teksten og kopier den.'; }
+  res.scrollIntoView({ behavior: 'smooth' });
+};
+
+const nullstill = document.getElementById('nullstill');
+let nullTid;
+nullstill.onclick = () => {
+  if (nullstill.dataset.sikker) {
+    st = { valg: {}, endring: {}, nye: {}, temaer: [] }; lagre(); tegnAlt();
+    document.getElementById('resultat').hidden = true;
+    nullstill.textContent = 'Nullstill'; delete nullstill.dataset.sikker; return;
+  }
+  nullstill.dataset.sikker = '1'; nullstill.textContent = 'Sikker? Trykk igjen';
+  clearTimeout(nullTid);
+  nullTid = setTimeout(() => { nullstill.textContent = 'Nullstill'; delete nullstill.dataset.sikker; }, 3000);
+};
+
+tegnAlt();
+</script>
 </body>
 </html>
