@@ -74,6 +74,19 @@ const PAUSESVAR = [
 // på "reinsdyr", "reinen", "reinflokken" osv.
 // Samme lydfil kan brukes flere steder.
 const SPESIAL = [
+  // Nevner du jenter, blir sjamanen plutselig veldig interessert.
+  // Står først i lista, så den vinner hvis spørsmålet også nevner rein.
+  { ord: ["jente", "dame", "dama", "kjæreste", "date", "flørt", "singel", "single", "forelsk", "crush"], sjanse: 1, svar: [
+    { tekst: "Vent litt. Jenter, sa du? Jeg legger fra meg lassoen. Fortell mer.", lyd: "lyd/jenter-01.mp3" },
+    { tekst: "Endelig et ordentlig spørsmål. Reinen kan vente.", lyd: "lyd/jenter-02.mp3" },
+    { tekst: "Er hun fra Kautokeino? Da kjenner jeg sikkert bestemoren hennes.", lyd: "lyd/jenter-03.mp3" },
+    { tekst: "Har hun egen rein? Det er det eneste som betyr noe.", lyd: "lyd/jenter-04.mp3" },
+    { tekst: "Jeg tar på meg den fine kofta. Hvor er hun?", lyd: "lyd/jenter-05.mp3" },
+    { tekst: "Hysj. Jeg har slått av scooteren. Jeg hører.", lyd: "lyd/jenter-06.mp3" },
+    { tekst: "Spør om hun liker bidos. Hvis ja: fri.", lyd: "lyd/jenter-07.mp3" },
+    { tekst: "Jeg skal joike til henne. Det har aldri slått feil. Det har alltid slått feil.", lyd: "lyd/jenter-08.mp3" },
+    { tekst: "Rart. Nå fikk jeg plutselig full dekning.", lyd: "lyd/jenter-09.mp3" },
+  ]},
   { ord: ["rein", "flokk", "lasso", "kalv", "simle", "bukk", "rudolf"], sjanse: 1, svar: [
     { tekst: "Ikke snakk om reinen min. Han er sensitiv.", lyd: "lyd/spesial-rein.mp3" },
     { tekst: "Er ute og henter rein. Tilbake snart. Eller til våren.", lyd: "lyd/01.mp3" },
