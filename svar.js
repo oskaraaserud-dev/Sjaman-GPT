@@ -91,12 +91,12 @@ const SPESIAL = [
   // det er like frekt som å spørre hvor mye noen tjener.
   // Står foran rein-gruppa, så dette svaret vinner.
   { ord: ["hvor mange rein", "hvor mye rein", "antall rein", "hvor stor flokk", "hvor stor er flokken", "hvor mange dyr"], sjanse: 1, svar: [
-    { tekst: "Man spør ikke en reineier hvor mange rein han har. Det er som å spørre hvor mye du tjener. Hvor mye tjener du, forresten?", lyd: "lyd/antall-01.mp3" },
-    { tekst: "Uff. Det spør man ikke om. Jeg later som jeg ikke hørte det.", lyd: "lyd/antall-02.mp3" },
-    { tekst: "Det skal jeg fortelle deg den dagen du viser meg skattemeldingen din.", lyd: "lyd/antall-03.mp3" },
-    { tekst: "Hvor mye har du på konto? Akkurat. Da er vi skuls.", lyd: "lyd/antall-04.mp3" },
-    { tekst: "Bestemor hadde vært veldig skuffet over deg nå.", lyd: "lyd/antall-05.mp3" },
-    { tekst: "Mange. Eller få. Det har du ingenting med.", lyd: "lyd/antall-06.mp3" },
+    { tekst: "Hvor mye tjener du?", lyd: "lyd/antall-01.mp3" },
+    { tekst: "Uff.", lyd: "lyd/antall-02.mp3" },
+    { tekst: "Jeg later som jeg ikke hørte det.", lyd: "lyd/antall-03.mp3" },
+    { tekst: "Vis meg lønnsslippen din først.", lyd: "lyd/antall-04.mp3" },
+    { tekst: "Bestemor hørte det der.", lyd: "lyd/antall-05.mp3" },
+    { tekst: "Neste spørsmål.", lyd: "lyd/antall-06.mp3" },
   ]},
   { ord: ["rein", "flokk", "lasso", "kalv", "simle", "bukk", "rudolf"], sjanse: 1, svar: [
     { tekst: "Ikke snakk om reinen min. Han er sensitiv.", lyd: "lyd/spesial-rein.mp3" },
