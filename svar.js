@@ -74,6 +74,21 @@ const SVAR = [
 ];
 
 
+// Svar når noen sender et bilde.
+// Bare bilde: alltid herfra. Bilde + tekst: 7 av 10 ganger herfra.
+const BILDESVAR = [
+  { tekst: "Er det en rein?", lyd: "lyd/bilde-01.mp3" },
+  { tekst: "Det der er ikke en rein.", lyd: "lyd/bilde-02.mp3" },
+  { tekst: "Jeg ser ingenting. Det er mørketid.", lyd: "lyd/bilde-03.mp3" },
+  { tekst: "Bildet laster … 1 % … 1 % …", lyd: "lyd/bilde-04.mp3" },
+  { tekst: "Jeg har sett bedre. Jeg har sett nordlyset.", lyd: "lyd/bilde-05.mp3" },
+  { tekst: "Fint. Hva skal jeg med det?", lyd: "lyd/bilde-06.mp3" },
+  { tekst: "Jeg viser det til bestemor.", lyd: "lyd/bilde-07.mp3" },
+  { tekst: "Hm. Uskarpt.", lyd: "lyd/bilde-08.mp3" },
+  { tekst: "Jeg henger det opp i lavvoen.", lyd: "lyd/bilde-09.mp3" },
+];
+
+
 // Svar som brukes i pausen 08–16 (halvparten av gangene).
 // Legg gjerne til flere.
 const PAUSESVAR = [

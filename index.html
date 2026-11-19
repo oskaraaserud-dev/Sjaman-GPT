@@ -118,6 +118,7 @@
     max-width: 720px; margin: 0 auto; display: flex; align-items: flex-end; gap: 8px;
     background: rgba(20,27,61,.9); border: 1px solid var(--kant); border-radius: 22px; padding: 8px 8px 8px 18px;
     backdrop-filter: blur(10px); box-shadow: 0 10px 40px rgba(0,0,0,.4);
+    padding-left: 8px;
   }
   .boks:focus-within { border-color: var(--gul); }
   textarea { flex: 1; background: none; border: none; color: var(--snø); font: inherit; font-size: 16px; resize: none; outline: none; max-height: 160px; padding: 8px 0; }
@@ -171,6 +172,19 @@
     .app.meny-åpen .meny-skygge { display: block; position: fixed; inset: 0; background: rgba(5,8,20,.6); z-index: 5; }
     .samtale .slett { opacity: 1; }
   }
+
+  /* ---------- Bilder ---------- */
+  .vedlegg-knapp { width: 40px; height: 40px; border-radius: 50%; border: none; background: none; color: var(--dempet); font-size: 24px; line-height: 1; cursor: pointer; flex-shrink: 0; }
+  .vedlegg-knapp:hover { color: var(--snø); background: var(--kort); }
+  .vedlegg { max-width: 720px; margin: 0 auto 10px; display: flex; }
+  .vedlegg-bilde { position: relative; }
+  .vedlegg img { height: 72px; max-width: 160px; object-fit: cover; border-radius: 12px; border: 1px solid var(--kant); display: block; }
+  .vedlegg button { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 50%; border: none; background: var(--snø); color: var(--natt); cursor: pointer; font-size: 12px; }
+  .msg.bruker.med-bilde { padding: 6px; }
+  .msg.bruker .bilde { display: block; max-width: min(260px, 100%); max-height: 320px; border-radius: 14px; cursor: zoom-in; }
+  .msg.bruker.med-bilde span { display: block; padding: 6px 10px 4px; }
+  #bildeModal img { max-width: 100%; max-height: 85dvh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.6); cursor: zoom-out; }
+  footer.drar .boks { border-color: var(--gul); border-style: dashed; }
 
   /* ---------- Oppgrader-knapp ---------- */
   .oppgrader {
@@ -302,7 +316,12 @@
 <div id="chat"><div class="inner" id="inner"></div></div>
 
 <footer>
+  <div class="vedlegg" id="vedlegg" hidden>
+    <div class="vedlegg-bilde"><img id="vedleggBilde" alt="Valgt bilde"><button id="fjernVedlegg" title="Fjern bilde">✕</button></div>
+  </div>
   <div class="boks">
+    <button class="vedlegg-knapp" id="vedleggKnapp" title="Legg til bilde">＋</button>
+    <input type="file" id="filInput" accept="image/*" hidden>
     <textarea id="input" rows="1" placeholder="Spør sjamanen …"></textarea>
     <button id="send" disabled title="Send">↑</button>
   </div>
@@ -401,6 +420,8 @@
   </div>
 </div>
 
+<div class="modal-bakgrunn" id="bildeModal" hidden><img id="storBilde" alt="" data-lukk></div>
+
 <div class="toast" id="toast" hidden aria-live="polite"></div>
 
 <script src="svar.js"></script>
@@ -450,7 +471,22 @@ const NØKKEL = 'sjaman-gpt-samtaler';
 let samtaler = [];
 try { samtaler = JSON.parse(localStorage.getItem(NØKKEL)) || []; } catch { samtaler = []; }
 let aktivId = null, økt = 0;
-function lagre() { try { localStorage.setItem(NØKKEL, JSON.stringify(samtaler)); } catch {} }
+function lagre() {
+  try { localStorage.setItem(NØKKEL, JSON.stringify(samtaler)); return; } catch {}
+  // Lagringen er full: fjern bilder fra de eldste samtalene til det får plass
+  for (const s of [...samtaler].reverse()) {
+    if (s.id === aktivId) continue;
+    let endret = false;
+    for (const m of s.meldinger) if (m.bilde) { delete m.bilde; m.tekst = (m.tekst ? m.tekst + ' ' : '') + '[bilde slettet]'; endret = true; }
+    if (!endret) continue;
+    try {
+      localStorage.setItem(NØKKEL, JSON.stringify(samtaler));
+      toast("Lagringen var full, så noen gamle bilder ble slettet.");
+      return;
+    } catch {}
+  }
+  toast("Lagringsplassen er full. Slett noen samtaler.");
+}
 const aktiv = () => samtaler.find(s => s.id === aktivId);
 
 const app = document.getElementById('app');
@@ -507,11 +543,85 @@ function oppdaterTeller() {
 }
 
 // ---------- Bygge meldinger ----------
-function leggTilBruker(tekst) {
+function leggTilBruker(tekst, bilde) {
   const u = document.createElement('div');
-  u.className = 'msg bruker'; u.textContent = tekst;
+  u.className = 'msg bruker' + (bilde ? ' med-bilde' : '');
+  if (bilde) {
+    const img = document.createElement('img');
+    img.className = 'bilde'; img.src = bilde; img.alt = 'Bilde';
+    img.onclick = () => { document.getElementById('storBilde').src = bilde; åpne('bildeModal'); };
+    img.onload = scroll;
+    u.appendChild(img);
+  }
+  if (tekst) {
+    const t = document.createElement('span');
+    t.textContent = tekst;
+    u.appendChild(t);
+  }
   inner.appendChild(u);
 }
+
+// ---------- Bildevedlegg ----------
+let ventendeBilde = null;
+const vedlegg = document.getElementById('vedlegg');
+const filInput = document.getElementById('filInput');
+
+function lesBilde(fil) {
+  return new Promise((ok, feil) => {
+    if (!fil || !fil.type.startsWith('image/')) return feil();
+    const url = URL.createObjectURL(fil);
+    const img = new Image();
+    img.onload = () => {
+      const maks = 640;   // krymp så det får plass i nettleserens lagring
+      const skala = Math.min(1, maks / Math.max(img.width, img.height));
+      const lerret = document.createElement('canvas');
+      lerret.width = Math.round(img.width * skala);
+      lerret.height = Math.round(img.height * skala);
+      const g = lerret.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, lerret.width, lerret.height);
+      g.drawImage(img, 0, 0, lerret.width, lerret.height);
+      URL.revokeObjectURL(url);
+      ok(lerret.toDataURL('image/jpeg', 0.75));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); feil(); };
+    img.src = url;
+  });
+}
+
+async function velgBilde(fil) {
+  try {
+    ventendeBilde = await lesBilde(fil);
+    document.getElementById('vedleggBilde').src = ventendeBilde;
+    vedlegg.hidden = false;
+    oppdaterInput();
+    input.focus();
+  } catch {
+    toast("Det der var ikke et bilde. Sjamanen sjekket.");
+  }
+}
+
+function fjernBilde() {
+  ventendeBilde = null;
+  vedlegg.hidden = true;
+  filInput.value = '';
+  oppdaterInput();
+}
+
+document.getElementById('vedleggKnapp').onclick = () => filInput.click();
+filInput.onchange = () => { if (filInput.files[0]) velgBilde(filInput.files[0]); };
+document.getElementById('fjernVedlegg').onclick = fjernBilde;
+input.addEventListener('paste', e => {
+  const fil = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/'));
+  if (fil) { e.preventDefault(); velgBilde(fil); }
+});
+const fot = document.querySelector('footer');
+fot.addEventListener('dragover', e => { e.preventDefault(); fot.classList.add('drar'); });
+fot.addEventListener('dragleave', () => fot.classList.remove('drar'));
+fot.addEventListener('drop', e => {
+  e.preventDefault(); fot.classList.remove('drar');
+  const fil = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+  if (fil) velgBilde(fil);
+});
 
 function lagSjaman() {
   const m = document.createElement('div');
@@ -573,7 +683,7 @@ function visSamtale(id) {
   else {
     inner.innerHTML = '';
     for (const m of s.meldinger) {
-      if (m.rolle === 'bruker') leggTilBruker(m.tekst);
+      if (m.rolle === 'bruker') leggTilBruker(m.tekst, m.bilde);
       else if (m.rolle === 'sjaman') visSvarStatisk(m.svar);
       else if (m.rolle === 'mersalg') leggTilMersalg();
     }
@@ -618,7 +728,8 @@ function velgSvar(spørsmål) {
 
 async function sendMelding(tekst) {
   tekst = tekst.trim();
-  if (!tekst || opptatt) return;
+  const bilde = ventendeBilde;
+  if ((!tekst && !bilde) || opptatt) return;
   opptatt = true;
   const minØkt = økt;
 
@@ -626,28 +737,29 @@ async function sendMelding(tekst) {
   if (!s) {
     s = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      tittel: tekst.length > 40 ? tekst.slice(0, 40).trim() + '…' : tekst,
+      tittel: !tekst ? '📷 Bilde' : tekst.length > 40 ? tekst.slice(0, 40).trim() + '…' : tekst,
       tid: Date.now(), meldinger: [],
     };
     aktivId = s.id;
     inner.innerHTML = '';
   }
-  s.meldinger.push({ rolle: 'bruker', tekst });
+  s.meldinger.push(bilde ? { rolle: 'bruker', tekst, bilde } : { rolle: 'bruker', tekst });
   s.tid = Date.now();
   samtaler = [s, ...samtaler.filter(x => x !== s)];   // nyeste øverst
   lagre(); tegnListe();
 
-  leggTilBruker(tekst);
-  input.value = ''; oppdaterInput();
+  leggTilBruker(tekst, bilde);
+  input.value = ''; fjernBilde();
 
   const m = lagSjaman();
   const innhold = m.querySelector('.innhold');
-  innhold.innerHTML = `<div class="tenker"><span class="rein-løper">🦌</span> ${tilfeldig(TENKER)} …</div>`;
+  innhold.innerHTML = `<div class="tenker"><span class="rein-løper">🦌</span> ${bilde ? 'Myser på bildet' : tilfeldig(TENKER)} …</div>`;
   scroll();
   await vent(1800 + Math.random() * 2200);
 
   // Svaret lagres selv om brukeren har byttet samtale i mellomtiden
-  const svar = velgSvar(tekst);
+  const harBildesvar = bilde && typeof BILDESVAR !== 'undefined' && BILDESVAR.length;
+  const svar = harBildesvar && (!tekst || Math.random() < 0.7) ? tilfeldig(BILDESVAR) : velgSvar(tekst);
   s.meldinger.push({ rolle: 'sjaman', svar });
   const antallSvar = s.meldinger.filter(x => x.rolle === 'sjaman').length;
   const mersalg = antallSvar % 4 === 0;
@@ -678,7 +790,7 @@ async function sendMelding(tekst) {
 }
 
 function oppdaterInput() {
-  send.disabled = !input.value.trim();
+  send.disabled = !input.value.trim() && !ventendeBilde;
   input.style.height = 'auto';
   input.style.height = input.scrollHeight + 'px';
 }
