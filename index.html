@@ -535,6 +535,13 @@ function leggTilHandlinger(m, svar) {
   spillKnapp.onclick = () => spill(svar.lyd);
   kopier.onclick = () => { navigator.clipboard?.writeText(svar.tekst || '🔊'); kopier.textContent = '✓'; };
   if (!svar.lyd) spillKnapp.remove();
+  else {
+    // Skjul 🔊 hvis lydfila ikke finnes (ennå)
+    const test = new Audio();
+    test.preload = 'metadata';
+    test.onerror = () => spillKnapp.remove();
+    test.src = svar.lyd;
+  }
   opp.onclick = () => opp.textContent = '🦌';
   ned.onclick = () => ned.textContent = '🙄';
   m.querySelector('.boble').appendChild(h);

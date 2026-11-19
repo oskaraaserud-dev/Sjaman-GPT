@@ -108,11 +108,143 @@ const SPESIAL = [
     { tekst: "Det står en rein foran tastaturet. Han flytter seg ikke.", lyd: "lyd/17.mp3" },
     { tekst: "Serverne er overbelastet. Serveren er en rein, og han er sliten.", lyd: "lyd/32.mp3" },
   ]},
-  { ord: ["hei", "hallo", "heisann"], svar: [
-    { tekst: "Buorre beaivi! … Det var alt.", lyd: "lyd/spesial-hei.mp3" },
+
+  // ---- Rekkefølgen betyr noe: den første gruppa som treffer, vinner. ----
+  // Derfor står de mest spesifikke først (f.eks. skole før mat,
+  // fordi "mat" ellers ville truffet "matteleksa").
+
+  { ord: ["meningen med livet", "mening med livet", "livets mening"], sjanse: 1, svar: [
+    { tekst: "Kaffe.", lyd: "lyd/livet-01.mp3" },
+    { tekst: "400.", lyd: "lyd/livet-02.mp3" },
+    { tekst: "Bestemor vet. Hun sier det ikke.", lyd: "lyd/livet-03.mp3" },
+    { tekst: "Spør meg etter kalvmerkinga.", lyd: "lyd/livet-04.mp3" },
   ]},
-  { ord: ["takk"], svar: [
+  { ord: ["hvordan går det", "hvordan har du det", "står til", "går det bra", "hva skjer"], sjanse: 0.9, svar: [
+    { tekst: "Kaldt.", lyd: "lyd/gardet-01.mp3" },
+    { tekst: "Kunne vært verre. Kunne vært sommer.", lyd: "lyd/gardet-02.mp3" },
+    { tekst: "Jeg har kaffe. Så bra.", lyd: "lyd/gardet-03.mp3" },
+    { tekst: "Scooteren står fast. Ellers bra.", lyd: "lyd/gardet-04.mp3" },
+    { tekst: "Hvem vil vite det?", lyd: "lyd/gardet-05.mp3" },
+  ]},
+  { ord: ["hvem er du", "hva heter du", "hva er du"], sjanse: 1, svar: [
+    { tekst: "Sjamanen. Neste.", lyd: "lyd/hvem-01.mp3" },
+    { tekst: "Det vet bare reinen.", lyd: "lyd/hvem-02.mp3" },
+    { tekst: "Hvem er du?", lyd: "lyd/hvem-03.mp3" },
+  ]},
+  { ord: ["hei", "hallo", "halla", "heisann", "god morgen", "god dag", "god kveld", "bures", "buorre", "yo"], sjanse: 0.9, svar: [
+    { tekst: "Bures.", lyd: "lyd/hei-01.mp3" },
+    { tekst: "Buorre beaivi! … Det var alt.", lyd: "lyd/spesial-hei.mp3" },
+    { tekst: "Hei. Jeg er opptatt.", lyd: "lyd/hei-02.mp3" },
+    { tekst: "Hvem er dette?", lyd: "lyd/hei-03.mp3" },
+    { tekst: "Hei. Ha det.", lyd: "lyd/hei-04.mp3" },
+    { tekst: "Hallo? … Hallo? Du brytes opp.", lyd: "lyd/hei-05.mp3" },
+  ]},
+  { ord: ["ha det", "hade", "snakkes", "god natt", "bye", "vi ses"], sjanse: 1, svar: [
+    { tekst: "Endelig.", lyd: "lyd/hadet-01.mp3" },
+    { tekst: "Lukk døra etter deg.", lyd: "lyd/hadet-02.mp3" },
+    { tekst: "Snakkes. Eller ikke.", lyd: "lyd/hadet-03.mp3" },
+    { tekst: "Giitu for besøket.", lyd: "lyd/hadet-04.mp3" },
+  ]},
+  { ord: ["takk", "tusen takk", "giitu"], sjanse: 1, svar: [
     { tekst: "Giitu for spørsmålet. Svar kommer aldri.", lyd: "lyd/spesial-takk.mp3" },
+    { tekst: "For hva?", lyd: "lyd/takk-01.mp3" },
+    { tekst: "Jeg gjorde ingenting.", lyd: "lyd/takk-02.mp3" },
+    { tekst: "Det blir 3 tørrfisk.", lyd: "lyd/takk-03.mp3" },
+  ]},
+  { ord: ["lekse", "matte", "skole", "innlevering", "eksamen", "oppgave", "lærer"], sjanse: 1, svar: [
+    { tekst: "Gjør den selv.", lyd: "lyd/skole-01.mp3" },
+    { tekst: "Svaret er 400.", lyd: "lyd/skole-02.mp3" },
+    { tekst: "Kopier sidemannen.", lyd: "lyd/skole-03.mp3" },
+    { tekst: "Jeg gikk ikke på skolen. Jeg gikk med flokken.", lyd: "lyd/skole-04.mp3" },
+    { tekst: "Si at gjeterhunden spiste den.", lyd: "lyd/skole-05.mp3" },
+  ]},
+  { ord: ["kaffe", "kaffi", "termos"], sjanse: 1, svar: [
+    { tekst: "Endelig noen som forstår meg.", lyd: "lyd/kaffe-01.mp3" },
+    { tekst: "Svart.", lyd: "lyd/kaffe-02.mp3" },
+    { tekst: "Jeg har tre termoser. Ingen av dem er til deg.", lyd: "lyd/kaffe-03.mp3" },
+    { tekst: "Med kaffeost. Ellers er det ikke kaffe.", lyd: "lyd/kaffe-04.mp3" },
+  ]},
+  { ord: ["mat", "sulten", "middag", "lunsj", "frokost", "pizza", "kebab", "taco", "bidos"], svar: [
+    { tekst: "Bidos.", lyd: "lyd/mat-01.mp3" },
+    { tekst: "Tørrfisk.", lyd: "lyd/mat-02.mp3" },
+    { tekst: "Det er kaffeost i kjøleskapet. Ikke rør den.", lyd: "lyd/mat-03.mp3" },
+    { tekst: "Jeg spiser nå. Ring senere.", lyd: "lyd/mat-04.mp3" },
+    { tekst: "Pizza? Her? Ha.", lyd: "lyd/mat-05.mp3" },
+  ]},
+  { ord: ["været", "værmelding", "værvarsel", "kaldt", "grader", "snør", "nordlys"], sjanse: 1, svar: [
+    { tekst: "Kaldt.", lyd: "lyd/vaer-01.mp3" },
+    { tekst: "Se ut av vinduet.", lyd: "lyd/vaer-02.mp3" },
+    { tekst: "Det blir vær.", lyd: "lyd/vaer-03.mp3" },
+    { tekst: "Minus 30 og fint.", lyd: "lyd/vaer-04.mp3" },
+    { tekst: "Spør reinen. Han står ute.", lyd: "lyd/vaer-05.mp3" },
+  ]},
+  { ord: ["scooter", "snøscooter", "skuter"], sjanse: 1, svar: [
+    { tekst: "Den står fast.", lyd: "lyd/scooter-01.mp3" },
+    { tekst: "Den starter ikke.", lyd: "lyd/scooter-02.mp3" },
+    { tekst: "Tom for bensin. Igjen.", lyd: "lyd/scooter-03.mp3" },
+    { tekst: "Ikke snakk om scooteren.", lyd: "lyd/scooter-04.mp3" },
+  ]},
+  { ord: ["joik", "synge", "syng", "sang"], sjanse: 1, svar: [
+    { tekst: "Jeg joiker ikke på bestilling.", lyd: "lyd/joik-01.mp3" },
+    { tekst: "Det koster 5 tørrfisk.", lyd: "lyd/joik-02.mp3" },
+    { tekst: "Nei.", lyd: "lyd/joik-03.mp3" },
+    // Når dere har en joike-lyd: { lyd: "lyd/joik.mp3" },
+  ]},
+  { ord: ["sverige", "svensk", "svenske"], sjanse: 1, svar: [
+    { tekst: "Ikke snakk om dem.", lyd: "lyd/sverige-01.mp3" },
+    { tekst: "Flokken min er der. Den kommer ikke tilbake.", lyd: "lyd/sverige-02.mp3" },
+    { tekst: "Hva? Jeg forstår ikke svensk.", lyd: "lyd/sverige-03.mp3" },
+  ]},
+  { ord: ["oslo", "bergen", "trondheim", "stavanger"], sjanse: 1, svar: [
+    { tekst: "Der har de ikke rein. Bare duer.", lyd: "lyd/sorpa-01.mp3" },
+    { tekst: "Det er for langt sør.", lyd: "lyd/sorpa-02.mp3" },
+    { tekst: "Har de dekning der?", lyd: "lyd/sorpa-03.mp3" },
+  ]},
+  { ord: ["kautokeino", "guovdageaidnu", "karasjok", "finnmark"], sjanse: 1, svar: [
+    { tekst: "Hils bestemor.", lyd: "lyd/hjemme-01.mp3" },
+    { tekst: "Jeg er der. Jeg er alltid der.", lyd: "lyd/hjemme-02.mp3" },
+    { tekst: "Hvem er din familie?", lyd: "lyd/hjemme-03.mp3" },
+  ]},
+  { ord: ["jule", "jula", "julaften", "nisse"], sjanse: 1, svar: [
+    { tekst: "Nissen låner reinen min hvert år. Han har aldri levert dem tilbake.", lyd: "lyd/jul-01.mp3" },
+    { tekst: "Jeg teller rein i jula.", lyd: "lyd/jul-02.mp3" },
+    { tekst: "Ikke nevn nissen.", lyd: "lyd/jul-03.mp3" },
+  ]},
+  { ord: ["chatgpt", "gpt", "ai", "robot", "kunstig intelligens"], sjanse: 1, svar: [
+    { tekst: "ChatGPT er svogeren min. Vi snakker ikke sammen.", lyd: "lyd/ai-01.mp3" },
+    { tekst: "Jeg er ikke en robot. Jeg er bare treg.", lyd: "lyd/ai-02.mp3" },
+    { tekst: "Jeg kjører på én rein og en termos.", lyd: "lyd/ai-03.mp3" },
+  ]},
+  { ord: ["penger", "penga", "lønn", "vipps", "låne", "betale"], sjanse: 1, svar: [
+    { tekst: "Vipps meg først.", lyd: "lyd/penger-01.mp3" },
+    { tekst: "Jeg har 3 tørrfisk. De er ikke til salgs.", lyd: "lyd/penger-02.mp3" },
+    { tekst: "Nei.", lyd: "lyd/penger-03.mp3" },
+  ]},
+  { ord: ["hjelp", "hjelpe"], svar: [
+    { tekst: "Nei.", lyd: "lyd/hjelp-01.mp3" },
+    { tekst: "Ring 113.", lyd: "lyd/hjelp-02.mp3" },
+    { tekst: "Jeg kan ikke engang hjelpe meg selv.", lyd: "lyd/hjelp-03.mp3" },
+    { tekst: "Har du prøvd å slå den av og på?", lyd: "lyd/hjelp-04.mp3" },
+  ]},
+  { ord: ["klokka", "klokken", "hvilken dag"], sjanse: 1, svar: [
+    { tekst: "Kaffetid.", lyd: "lyd/klokka-01.mp3" },
+    { tekst: "Det er mørketid. Klokka spiller ingen rolle.", lyd: "lyd/klokka-02.mp3" },
+    { tekst: "Sent.", lyd: "lyd/klokka-03.mp3" },
+  ]},
+  { ord: ["unnskyld", "sorry", "beklager"], sjanse: 1, svar: [
+    { tekst: "Greit.", lyd: "lyd/sorry-01.mp3" },
+    { tekst: "For sent.", lyd: "lyd/sorry-02.mp3" },
+    { tekst: "Bestemor tilgir deg. Ikke jeg.", lyd: "lyd/sorry-03.mp3" },
+  ]},
+  { ord: ["haha", "hehe", "lol", "😂"], svar: [
+    { tekst: "Hva ler du av?", lyd: "lyd/haha-01.mp3" },
+    { tekst: "Det var ikke en vits.", lyd: "lyd/haha-02.mp3" },
+    { tekst: "Hysj.", lyd: "lyd/haha-03.mp3" },
+  ]},
+  { ord: ["faen", "helvete", "dritt", "jævla", "fuck"], sjanse: 1, svar: [
+    { tekst: "Hysj. Reinen hører.", lyd: "lyd/bann-01.mp3" },
+    { tekst: "Vask munnen med snø.", lyd: "lyd/bann-02.mp3" },
+    { tekst: "Jeg sier det til bestemor.", lyd: "lyd/bann-03.mp3" },
   ]},
 ];
 
