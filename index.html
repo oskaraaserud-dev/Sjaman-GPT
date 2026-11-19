@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="no">
 <head>
 <meta charset="UTF-8">
@@ -718,7 +718,7 @@ function spill(fil) {
 function velgSvar(spørsmål) {
   const s = spørsmål.toLowerCase();
   const spesial = SPESIAL.find(x => x.ord.some(o => new RegExp(`(^|[^a-zæøå])${o}`, 'i').test(s)));
-  if (spesial && spesial.svar.length && Math.random() < (spesial.sjanse ?? 0.7)) return tilfeldig(spesial.svar);
+  if (spesial && spesial.svar.length && Math.random() < (spesial.sjanse ?? 1)) return tilfeldig(spesial.svar);
   if (erPause() && PAUSESVAR.length && Math.random() < 0.5) return tilfeldig(PAUSESVAR);
   let i;
   do { i = Math.floor(Math.random() * SVAR.length); } while (i === sisteIndex && SVAR.length > 1);

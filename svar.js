@@ -1,4 +1,4 @@
-// ================================================================
+﻿// ================================================================
 //  SJAMAN GPT – ALLE SVAR OG LYDER
 //  Dette er den eneste filen dere trenger å endre for å legge til
 //  nye svar. Lagre filen og last siden på nytt.
@@ -98,7 +98,7 @@ const PAUSESVAR = [
 
 // Spesialsvar: hvis spørsmålet inneholder et av ordene, kommer
 // et av svarene i lista.
-// "sjanse" = hvor ofte (1 = alltid, 0.7 = 7 av 10 ganger).
+// "sjanse" = hvor ofte (1 = alltid, 0.7 = 7 av 10 ganger). Står det ikke noe, er det 1 (alltid).
 // Et ord matcher også starten av lengre ord: "rein" gir treff
 // på "reinsdyr", "reinen", "reinflokken" osv.
 // Samme lydfil kan brukes flere steder.
@@ -148,7 +148,7 @@ const SPESIAL = [
     { tekst: "Bestemor vet. Hun sier det ikke.", lyd: "lyd/livet-03.mp3" },
     { tekst: "Spør meg etter kalvmerkinga.", lyd: "lyd/livet-04.mp3" },
   ]},
-  { ord: ["hvordan går det", "hvordan har du det", "står til", "går det bra", "hva skjer"], sjanse: 0.9, svar: [
+  { ord: ["hvordan går det", "hvordan har du det", "står til", "går det bra", "hva skjer"], sjanse: 1, svar: [
     { tekst: "Kaldt.", lyd: "lyd/gardet-01.mp3" },
     { tekst: "Kunne vært verre. Kunne vært sommer.", lyd: "lyd/gardet-02.mp3" },
     { tekst: "Jeg har kaffe. Så bra.", lyd: "lyd/gardet-03.mp3" },
@@ -160,7 +160,7 @@ const SPESIAL = [
     { tekst: "Det vet bare reinen.", lyd: "lyd/hvem-02.mp3" },
     { tekst: "Hvem er du?", lyd: "lyd/hvem-03.mp3" },
   ]},
-  { ord: ["hei", "hallo", "halla", "heisann", "god morgen", "god dag", "god kveld", "bures", "buorre", "yo"], sjanse: 0.9, svar: [
+  { ord: ["hei", "hallo", "halla", "heisann", "god morgen", "god dag", "god kveld", "bures", "buorre", "yo"], sjanse: 1, svar: [
     { tekst: "Bures.", lyd: "lyd/hei-01.mp3" },
     { tekst: "Buorre beaivi! … Det var alt.", lyd: "lyd/spesial-hei.mp3" },
     { tekst: "Hei. Jeg er opptatt.", lyd: "lyd/hei-02.mp3" },
