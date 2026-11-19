@@ -1,4 +1,4 @@
-﻿// ================================================================
+// ================================================================
 //  SJAMAN GPT – ALLE SVAR OG LYDER
 //  Dette er den eneste filen dere trenger å endre for å legge til
 //  nye svar. Lagre filen og last siden på nytt.
