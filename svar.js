@@ -87,6 +87,17 @@ const SPESIAL = [
     { tekst: "Jeg skal joike til henne. Det har aldri slått feil. Det har alltid slått feil.", lyd: "lyd/jenter-08.mp3" },
     { tekst: "Rart. Nå fikk jeg plutselig full dekning.", lyd: "lyd/jenter-09.mp3" },
   ]},
+  // Man spør ikke en reineier hvor mange rein han har –
+  // det er like frekt som å spørre hvor mye noen tjener.
+  // Står foran rein-gruppa, så dette svaret vinner.
+  { ord: ["hvor mange rein", "hvor mye rein", "antall rein", "hvor stor flokk", "hvor stor er flokken", "hvor mange dyr"], sjanse: 1, svar: [
+    { tekst: "Man spør ikke en reineier hvor mange rein han har. Det er som å spørre hvor mye du tjener. Hvor mye tjener du, forresten?", lyd: "lyd/antall-01.mp3" },
+    { tekst: "Uff. Det spør man ikke om. Jeg later som jeg ikke hørte det.", lyd: "lyd/antall-02.mp3" },
+    { tekst: "Det skal jeg fortelle deg den dagen du viser meg skattemeldingen din.", lyd: "lyd/antall-03.mp3" },
+    { tekst: "Hvor mye har du på konto? Akkurat. Da er vi skuls.", lyd: "lyd/antall-04.mp3" },
+    { tekst: "Bestemor hadde vært veldig skuffet over deg nå.", lyd: "lyd/antall-05.mp3" },
+    { tekst: "Mange. Eller få. Det har du ingenting med.", lyd: "lyd/antall-06.mp3" },
+  ]},
   { ord: ["rein", "flokk", "lasso", "kalv", "simle", "bukk", "rudolf"], sjanse: 1, svar: [
     { tekst: "Ikke snakk om reinen min. Han er sensitiv.", lyd: "lyd/spesial-rein.mp3" },
     { tekst: "Er ute og henter rein. Tilbake snart. Eller til våren.", lyd: "lyd/01.mp3" },
