@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sjaman GPT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  :root {
+    --natt: #0b1026; --natt2: #141b3d; --snø: #eef3ff; --dempet: #9aa6cc;
+    --rød: #d62828; --blå: #1d4ed8; --grønn: #16a34a; --gul: #facc15;
+    --kort: rgba(255,255,255,.06); --kant: rgba(255,255,255,.12);
+  }
+  body {
+    font-family: Inter, system-ui, sans-serif; color: var(--snø);
+    background: radial-gradient(ellipse at bottom, var(--natt2), var(--natt) 70%);
+    height: 100dvh; display: flex; flex-direction: column; overflow: hidden; position: relative;
+  }
+
+  /* ---------- Nordlys ---------- */
+  .nordlys { position: fixed; inset: -20% -10% auto -10%; height: 70%; pointer-events: none; z-index: 0; filter: blur(50px); opacity: .55; }
+  .nordlys div { position: absolute; border-radius: 50%; mix-blend-mode: screen; animation: drift 18s ease-in-out infinite alternate; }
+  .nordlys .a { width: 60%; height: 45%; left: 5%; top: 20%; background: #22c55e; }
+  .nordlys .b { width: 50%; height: 35%; left: 40%; top: 10%; background: #14b8a6; animation-duration: 24s; }
+  .nordlys .c { width: 35%; height: 30%; left: 65%; top: 30%; background: #a855f7; animation-duration: 30s; opacity: .7; }
+  @keyframes drift { 0% { transform: translateX(-8%) skewX(-10deg) scaleY(.8); } 100% { transform: translateX(10%) skewX(12deg) scaleY(1.2); } }
+
+  /* ---------- Snø ---------- */
+  #snø { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+  /* ---------- Fjell ---------- */
+  .fjell { position: fixed; bottom: 0; left: 0; width: 100%; height: 160px; z-index: 0; pointer-events: none; opacity: .9; }
+
+  /* ---------- Gákti-bånd ---------- */
+  .bånd {
+    height: 10px; flex-shrink: 0; position: relative; z-index: 2;
+    background:
+      repeating-linear-gradient(90deg, var(--rød) 0 14px, var(--gul) 14px 18px, var(--blå) 18px 32px, var(--gul) 32px 36px, var(--grønn) 36px 50px, var(--gul) 50px 54px);
+  }
+  .bånd::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px;
+    background: linear-gradient(135deg, var(--rød) 25%, transparent 25%) 0 0 / 12px 6px,
+                linear-gradient(225deg, var(--rød) 25%, transparent 25%) 0 0 / 12px 6px;
+  }
+
+  header { position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; padding: 16px 20px 10px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo svg { width: 40px; height: 40px; }
+  .logo h1 { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -.5px; }
+  .logo h1 span { background: linear-gradient(90deg, var(--rød), var(--gul), var(--grønn), var(--blå)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .status {
+    margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px;
+    background: var(--kort); border: 1px solid var(--kant); padding: 7px 12px; border-radius: 999px;
+    backdrop-filter: blur(8px); max-width: 55%;
+  }
+  .status .prikk { width: 9px; height: 9px; border-radius: 50%; background: var(--rød); box-shadow: 0 0 10px var(--rød); flex-shrink: 0; animation: puls 2s infinite; }
+  .status .tekst { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @keyframes puls { 50% { opacity: .35; } }
+  .ikonknapp { background: var(--kort); border: 1px solid var(--kant); color: var(--snø); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 15px; flex-shrink: 0; }
+  .ikonknapp:hover { background: rgba(255,255,255,.12); }
+
+  #chat { flex: 1; overflow-y: auto; position: relative; z-index: 1; padding: 0 16px; }
+  .inner { max-width: 720px; margin: 0 auto; padding: 16px 0 30px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* ---------- Startskjerm ---------- */
+  .tom { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; padding-top: 4vh; }
+  .stor-lavvo { width: 130px; height: 130px; filter: drop-shadow(0 0 30px rgba(34,197,94,.35)); }
+  .tom h2 { font-family: "Bricolage Grotesque", sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+  .tom p { color: var(--dempet); max-width: 420px; line-height: 1.5; }
+  .skilt {
+    background: #5b3a1e; color: #fde68a; border: 3px solid #3d2612; border-radius: 6px; padding: 10px 16px;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 14px; transform: rotate(-2deg);
+    box-shadow: 0 6px 0 #2a1a0c; line-height: 1.5;
+  }
+  .forslag { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 560px; margin-top: 6px; }
+  .forslag button {
+    text-align: left; background: var(--kort); border: 1px solid var(--kant); color: var(--snø);
+    padding: 12px 14px; border-radius: 14px; cursor: pointer; font: inherit; font-size: 14px; backdrop-filter: blur(6px);
+  }
+  .forslag button:hover { border-color: var(--gul); }
+  .forslag small { display: block; color: var(--dempet); font-size: 12px; margin-top: 2px; }
+
+  /* ---------- Meldinger ---------- */
+  .msg.bruker { align-self: flex-end; background: var(--blå); padding: 10px 16px; border-radius: 20px 20px 4px 20px; max-width: 78%; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+  .msg.sjaman { display: flex; gap: 10px; align-items: flex-start; max-width: 88%; }
+  .msg.sjaman .avatar { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: var(--natt2); border: 2px solid var(--gul); display: grid; place-items: center; }
+  .msg.sjaman .avatar svg { width: 22px; height: 22px; }
+  .boble {
+    background: rgba(20,27,61,.85); border: 1px solid var(--kant); border-radius: 4px 20px 20px 20px;
+    padding: 12px 16px; line-height: 1.6; backdrop-filter: blur(8px); position: relative; overflow: hidden;
+  }
+  .boble::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: repeating-linear-gradient(90deg, var(--rød) 0 10px, var(--gul) 10px 13px, var(--blå) 13px 23px, var(--gul) 23px 26px, var(--grønn) 26px 36px, var(--gul) 36px 39px); }
+  .navn { font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 13px; color: var(--gul); margin-bottom: 2px; }
+  .tenker { color: var(--dempet); font-style: italic; display: flex; align-items: center; gap: 8px; }
+  .rein-løper { display: inline-block; animation: trav .5s steps(2) infinite; font-style: normal; }
+  @keyframes trav { 50% { transform: translateY(-3px) rotate(-6deg); } }
+  .handlinger { display: flex; gap: 2px; margin-top: 6px; }
+  .handlinger button { background: none; border: none; color: var(--dempet); cursor: pointer; padding: 3px 6px; border-radius: 6px; font-size: 13px; }
+  .handlinger button:hover { color: var(--snø); background: rgba(255,255,255,.08); }
+
+  .lydmelding { display: flex; align-items: center; gap: 10px; }
+  .lydmelding button { width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--gul); color: var(--natt); cursor: pointer; font-size: 13px; }
+  .bølge { display: flex; align-items: center; gap: 3px; height: 26px; }
+  .bølge i { width: 3px; border-radius: 2px; background: var(--dempet); }
+  .bølge i:nth-child(3n) { height: 60%; } .bølge i:nth-child(3n+1) { height: 30%; } .bølge i:nth-child(3n+2) { height: 90%; }
+  .bølge i:nth-child(5n) { height: 45%; }
+
+  /* ---------- Input ---------- */
+  footer { position: relative; z-index: 2; padding: 10px 16px 14px; }
+  .boks {
+    max-width: 720px; margin: 0 auto; display: flex; align-items: flex-end; gap: 8px;
+    background: rgba(20,27,61,.9); border: 1px solid var(--kant); border-radius: 22px; padding: 8px 8px 8px 18px;
+    backdrop-filter: blur(10px); box-shadow: 0 10px 40px rgba(0,0,0,.4);
+  }
+  .boks:focus-within { border-color: var(--gul); }
+  textarea { flex: 1; background: none; border: none; color: var(--snø); font: inherit; font-size: 16px; resize: none; outline: none; max-height: 160px; padding: 8px 0; }
+  textarea::placeholder { color: var(--dempet); }
+  #send { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--rød); color: #fff; font-size: 18px; cursor: pointer; flex-shrink: 0; transition: transform .15s; }
+  #send:hover:not(:disabled) { transform: scale(1.08); }
+  #send:disabled { background: #33395a; color: var(--dempet); cursor: default; }
+  .info { max-width: 720px; margin: 8px auto 0; display: flex; justify-content: space-between; color: var(--dempet); font-size: 12px; gap: 10px; }
+
+  /* ---------- Layout med sidemeny ---------- */
+  .app { flex: 1; min-height: 0; display: flex; }
+  .hoved { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .sidebar {
+    position: relative; z-index: 3; width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px;
+    padding: 14px 10px 12px; background: rgba(9,13,34,.75); border-right: 1px solid var(--kant); backdrop-filter: blur(10px);
+  }
+  .app.uten-meny .sidebar { display: none; }
+  .ny-samtale {
+    display: flex; align-items: center; gap: 8px; width: 100%; background: var(--kort); border: 1px solid var(--kant);
+    color: var(--snø); padding: 10px 12px; border-radius: 12px; font: inherit; font-weight: 500; cursor: pointer;
+  }
+  .ny-samtale:hover { border-color: var(--gul); }
+  #samtaleListe { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+  #samtaleListe h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dempet); padding: 14px 10px 6px; font-weight: 600; }
+  .samtale { display: flex; align-items: center; border-radius: 10px; }
+  .samtale:hover, .samtale.aktiv { background: rgba(255,255,255,.08); }
+  .samtale.aktiv { box-shadow: inset 3px 0 0 var(--gul); }
+  .samtale .velg {
+    flex: 1; min-width: 0; text-align: left; background: none; border: none; color: var(--snø); font: inherit; font-size: 14px;
+    padding: 9px 10px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .samtale .slett { background: none; border: none; color: var(--dempet); cursor: pointer; padding: 6px 10px; opacity: 0; font-size: 12px; }
+  .samtale:hover .slett, .samtale.aktiv .slett { opacity: 1; }
+  .samtale .slett:hover { color: #f87171; }
+  .tom-liste { color: var(--dempet); font-size: 13px; padding: 14px 10px; line-height: 1.5; }
+  .bruker-kort { display: flex; align-items: center; gap: 10px; padding: 10px 6px 0; border-top: 1px solid var(--kant); }
+  .bruker-kort .rund { width: 34px; height: 34px; border-radius: 50%; background: var(--blå); display: grid; place-items: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .bruker-kort div { flex: 1; min-width: 0; font-size: 14px; }
+  .bruker-kort small { display: block; color: var(--dempet); font-size: 12px; }
+  .bruker-kort button { background: none; border: none; color: var(--gul); font: inherit; font-size: 12px; cursor: pointer; padding: 0; }
+  .meny-skygge { display: none; }
+
+  @media (max-width: 800px) {
+    .sidebar {
+      position: fixed; top: 0; bottom: 0; left: 0; width: min(290px, 85vw); z-index: 6;
+      transform: translateX(-100%); transition: transform .25s ease; background: rgba(9,13,34,.97);
+      padding-top: calc(14px + env(safe-area-inset-top, 0px)); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+    .app.uten-meny .sidebar { display: flex; }
+    .app.meny-åpen .sidebar { transform: none; }
+    .app.meny-åpen .meny-skygge { display: block; position: fixed; inset: 0; background: rgba(5,8,20,.6); z-index: 5; }
+    .samtale .slett { opacity: 1; }
+  }
+
+  /* ---------- Oppgrader-knapp ---------- */
+  .oppgrader {
+    background: linear-gradient(90deg, var(--gul), #f59e0b); color: var(--natt); border: none; border-radius: 999px;
+    padding: 8px 14px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 14px; cursor: pointer;
+    flex-shrink: 0; box-shadow: 0 0 18px rgba(250,204,21,.35); transition: transform .15s;
+  }
+  .oppgrader:hover { transform: scale(1.05); }
+  .status { min-width: 0; }
+
+  /* ---------- Modaler ---------- */
+  .modal-bakgrunn { position: fixed; inset: 0; z-index: 10; background: rgba(5,8,20,.72); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; }
+  .modal {
+    position: relative; width: 100%; max-width: 520px; max-height: 90dvh; overflow-y: auto;
+    background: var(--natt2); border: 1px solid var(--kant); border-radius: 20px; padding: 26px 22px 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5); animation: inn .2s ease-out;
+  }
+  .modal.stor { max-width: 980px; }
+  .modal::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(90deg, var(--rød) 0 10px, var(--gul) 10px 13px, var(--blå) 13px 23px, var(--gul) 23px 26px, var(--grønn) 26px 36px, var(--gul) 36px 39px); }
+  @keyframes inn { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+  .modal h2 { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -.5px; padding-right: 40px; }
+  .modal .under { color: var(--dempet); margin-top: 4px; }
+  .modal h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--dempet); margin-top: 22px; }
+  .lukk { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--kant); background: var(--kort); color: var(--snø); cursor: pointer; }
+  .lukk:hover { background: rgba(255,255,255,.12); }
+
+  .planer { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
+  .plan { position: relative; display: flex; flex-direction: column; gap: 12px; background: var(--kort); border: 1px solid var(--kant); border-radius: 16px; padding: 18px; }
+  .plan.populær { border-color: var(--gul); box-shadow: 0 0 24px rgba(250,204,21,.15); }
+  .plan .merke { position: absolute; top: -11px; left: 16px; background: var(--gul); color: var(--natt); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .plan h4 { font-family: "Bricolage Grotesque", sans-serif; font-size: 18px; }
+  .pris { font-family: "Bricolage Grotesque", sans-serif; font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .pris small { font-family: Inter, sans-serif; font-size: 13px; font-weight: 400; color: var(--dempet); }
+  .plan ul { list-style: none; display: flex; flex-direction: column; gap: 7px; font-size: 14px; color: #cdd5f0; flex: 1; }
+  .plan li::before { content: "✓ "; color: var(--grønn); font-weight: 600; }
+  .plan button { border: none; border-radius: 12px; padding: 10px; font: inherit; font-weight: 600; cursor: pointer; background: var(--snø); color: var(--natt); }
+  .plan.populær button { background: var(--gul); }
+  .plan button:disabled { background: #33395a; color: var(--dempet); cursor: default; }
+  .finskrift { color: var(--dempet); font-size: 12px; margin-top: 18px; line-height: 1.5; }
+
+  .rad { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--kant); }
+  .rad > span small { display: block; color: var(--dempet); font-size: 12px; margin-top: 2px; }
+  .rad.låst { cursor: pointer; }
+  .rad.låst .bryter { opacity: .5; }
+  .pro-merke { background: var(--gul); color: var(--natt); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; margin-left: 6px; vertical-align: 2px; }
+  .bryter { appearance: none; -webkit-appearance: none; width: 42px; height: 24px; border-radius: 999px; background: #33395a; position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; }
+  .bryter::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+  .bryter:checked { background: var(--grønn); }
+  .bryter:checked::after { transform: translateX(18px); }
+  .modal select { background: var(--natt); color: var(--snø); border: 1px solid var(--kant); border-radius: 10px; padding: 7px 10px; font: inherit; font-size: 14px; max-width: 55%; }
+  .modal input[type=range] { accent-color: var(--gul); width: 40%; }
+  .liten { background: var(--kort); border: 1px solid var(--kant); color: var(--snø); padding: 6px 14px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+  .liten:hover { background: rgba(255,255,255,.12); }
+  .liten.fare { color: #f87171; border-color: rgba(248,113,113,.4); }
+
+  /* ---------- Mersalg i chatten ---------- */
+  .mersalg { align-self: center; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; text-align: center;
+    background: rgba(250,204,21,.08); border: 1px dashed rgba(250,204,21,.5); border-radius: 14px; padding: 10px 16px; font-size: 14px; }
+  .mersalg button { background: var(--gul); color: var(--natt); border: none; border-radius: 999px; padding: 6px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+
+  /* ---------- Toast ---------- */
+  .toast { position: fixed; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20;
+    background: var(--snø); color: var(--natt); padding: 11px 18px; border-radius: 12px; font-weight: 500; font-size: 14px;
+    max-width: calc(100% - 32px); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.5); animation: inn .2s ease-out; }
+
+  @media (max-width: 600px) {
+    #lydKnapp { display: none; }
+    .oppgrader .ord { display: none; }
+    .oppgrader { padding: 8px 11px; }
+    header { gap: 8px; padding: 14px 14px 8px; }
+    .forslag { grid-template-columns: 1fr; }
+    .logo h1 { font-size: 18px; }
+    .status { font-size: 12px; max-width: 48%; }
+    .info .teller { display: none; }
+  }
+  @media (max-width: 480px) {
+    .status, .logo svg { display: none; }
+    .oppgrader { margin-left: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nordlys"><div class="a"></div><div class="b"></div><div class="c"></div></div>
+<canvas id="snø"></canvas>
+<svg class="fjell" viewBox="0 0 1200 160" preserveAspectRatio="none">
+  <path d="M0 160 L0 110 L120 60 L220 100 L340 40 L470 105 L580 70 L700 115 L820 50 L960 100 L1080 65 L1200 95 L1200 160 Z" fill="#0f1533"/>
+  <path d="M0 160 L0 130 L160 95 L300 125 L450 90 L620 135 L760 100 L900 130 L1050 105 L1200 125 L1200 160 Z" fill="#090d22"/>
+</svg>
+
+<div class="bånd"></div>
+
+<div class="app" id="app">
+<aside class="sidebar">
+  <button class="ny-samtale" id="sideNy">＋ Ny samtale</button>
+  <div id="samtaleListe"></div>
+  <div class="bruker-kort">
+    <span class="rund">Du</span>
+    <div>Gratisbruker<small>0 svar igjen i dag</small></div>
+    <button id="sideOppgrader">✦ Pro</button>
+  </div>
+</aside>
+<div class="meny-skygge"></div>
+
+<div class="hoved">
+<header>
+  <button class="ikonknapp" id="menyKnapp" title="Samtaler">☰</button>
+  <div class="logo">
+    <svg viewBox="0 0 48 48" fill="none">
+      <path d="M24 6 L8 42 H40 Z" fill="#1d4ed8"/>
+      <path d="M24 6 L16 24 H32 Z" fill="#d62828"/>
+      <path d="M12 33 H36" stroke="#facc15" stroke-width="3"/>
+      <path d="M10 37.5 H38" stroke="#16a34a" stroke-width="3"/>
+      <path d="M20 42 L24 31 L28 42 Z" fill="#0b1026"/>
+      <path d="M24 6 L20 1 M24 6 L28 1 M24 6 L24 0" stroke="#eef3ff" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <h1>Sjaman <span>GPT</span></h1>
+  </div>
+  <div class="status" title="Hva sjamanen driver med nå">
+    <span class="prikk"></span><span class="tekst" id="status">Henter status …</span>
+  </div>
+  <button class="oppgrader" id="oppgraderKnapp" title="Oppgrader til Pro">✦<span class="ord"> Oppgrader</span></button>
+  <button class="ikonknapp" id="lydKnapp" title="Lyd av/på">🔊</button>
+  <button class="ikonknapp" id="innstKnapp" title="Innstillinger">⚙</button>
+  <button class="ikonknapp" onclick="nyChat()" title="Ny samtale">✎</button>
+</header>
+
+<div id="chat"><div class="inner" id="inner"></div></div>
+
+<footer>
+  <div class="boks">
+    <textarea id="input" rows="1" placeholder="Spør sjamanen …"></textarea>
+    <button id="send" disabled title="Send">↑</button>
+  </div>
+  <div class="info">
+    <span>Sjaman GPT kan gjøre feil. Han gjør det stort sett hele tiden.</span>
+    <span class="teller" id="teller">Spørsmål besvart: 0</span>
+  </div>
+</footer>
+</div>
+</div>
+
+<div class="bånd"></div>
+
+<!-- ---------- Oppgrader ---------- -->
+<div class="modal-bakgrunn" id="proModal" hidden>
+  <div class="modal stor" role="dialog" aria-labelledby="proTittel">
+    <button class="lukk" data-lukk title="Lukk">✕</button>
+    <h2 id="proTittel">Oppgrader Sjaman GPT</h2>
+    <p class="under">Få enda flere avslag, raskere enn noen gang.</p>
+    <div class="planer">
+      <div class="plan">
+        <h4>Gratis</h4>
+        <div class="pris">0 tørrfisk <small>/mnd</small></div>
+        <ul>
+          <li>0 svar per dag</li>
+          <li>Ubegrenset ventetid</li>
+          <li>Sjamanen ser meldingen din (av og til)</li>
+        </ul>
+        <button disabled>Din nåværende plan</button>
+      </div>
+      <div class="plan">
+        <h4>Sjaman Pluss</h4>
+        <div class="pris">3 tørrfisk <small>/mnd</small></div>
+        <ul>
+          <li>Alt i Gratis</li>
+          <li>Raskere avslag</li>
+          <li>Prioritert plass i køen (nr. 4 811)</li>
+          <li>Sjamanen sukker mindre høyt</li>
+        </ul>
+        <button class="kjøp" data-plan="Pluss">Oppgrader til Pluss</button>
+      </div>
+      <div class="plan populær">
+        <span class="merke">Mest populær blant rein</span>
+        <h4>Sjaman Pro</h4>
+        <div class="pris">12 tørrfisk <small>+ 1 termos /mnd</small></div>
+        <ul>
+          <li>Alt i Pluss</li>
+          <li>Ubegrensede avslag</li>
+          <li>Sjamanen leser spørsmålet ditt (svar ikke garantert)</li>
+          <li>Tilgang til Rein-1 (eksperimentell)</li>
+          <li>Hjelpsomhet-modus (beta)</li>
+        </ul>
+        <button class="kjøp" data-plan="Pro">Oppgrader til Pro</button>
+      </div>
+      <div class="plan">
+        <h4>Siida</h4>
+        <div class="pris">Kontakt bestemor</div>
+        <ul>
+          <li>Hele flokken på én konto</li>
+          <li>Egen kontaktperson (har ikke dekning)</li>
+          <li>Garantert svar innen én flytting*</li>
+        </ul>
+        <button class="kjøp" data-plan="Siida">Ring bestemor</button>
+      </div>
+    </div>
+    <p class="finskrift">Alle priser er inkl. mva. på tørrfisk. Betaling i tørrfisk, kaffeost eller bidos. Ingen angrerett. Abonnementet fornyes automatisk hver gang det er fullmåne.<br>* Gjelder ikke under kalvmerking, påske, flytting eller når det er fint vær.</p>
+  </div>
+</div>
+
+<!-- ---------- Innstillinger ---------- -->
+<div class="modal-bakgrunn" id="innstModal" hidden>
+  <div class="modal" role="dialog" aria-labelledby="innstTittel">
+    <button class="lukk" data-lukk title="Lukk">✕</button>
+    <h2 id="innstTittel">Innstillinger</h2>
+
+    <h3>Generelt</h3>
+    <label class="rad"><span>Lyd<small>Sjamanens stemme</small></span><input type="checkbox" class="bryter" id="vLyd" checked></label>
+    <label class="rad"><span>Snøfall</span><input type="checkbox" class="bryter" id="vSnø" checked></label>
+    <label class="rad"><span>Nordlys</span><input type="checkbox" class="bryter" id="vNordlys" checked></label>
+
+    <h3>Modell</h3>
+    <div class="rad"><span>Modell</span>
+      <select id="vModell"><option>Sjaman-4o</option><option>Sjaman-4o mini (mindre bidos)</option><option>Rein-1 (eksperimentell)</option></select>
+    </div>
+    <div class="rad"><span>Svarlengde<small id="lengdeTekst">Kort</small></span><input type="range" id="vLengde" min="0" max="3" value="0"></div>
+    <div class="rad"><span>Språk</span>
+      <select id="vSpråk"><option>Norsk</option><option>Davvisámegiella</option><option>Svensk (krever tolk)</option></select>
+    </div>
+    <div class="rad låst" id="vHjelp"><span>Hjelpsomhet <b class="pro-merke">PRO</b><small>Sjamanen prøver å svare</small></span><input type="checkbox" class="bryter" tabindex="-1"></div>
+    <label class="rad"><span>Minne<small>La sjamanen huske deg</small></span><input type="checkbox" class="bryter" id="vMinne"></label>
+
+    <h3>Konto</h3>
+    <div class="rad"><span>Plan<small>Gratis · 0 svar igjen i dag</small></span><button class="liten" id="tilPro">✦ Oppgrader</button></div>
+    <div class="rad"><span>Slett alle samtaler</span><button class="liten fare" id="vSlett">Slett</button></div>
+    <div class="rad"><span>Logg ut</span><button class="liten" id="vLoggUt">Logg ut</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden aria-live="polite"></div>
+
+<script src="svar.js"></script>
+<script>
+// ============================================================
+//  LOGIKK
+// ============================================================
+const inner = document.getElementById('inner');
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const send = document.getElementById('send');
+let lydPå = true, opptatt = false, sisteIndex = -1, lydNå = null, antall = 0, snøPå = true;
+
+const avatar = `<svg viewBox="0 0 48 48"><path d="M24 6 L8 42 H40 Z" fill="#1d4ed8"/><path d="M24 6 L16 24 H32 Z" fill="#d62828"/><path d="M12 33 H36" stroke="#facc15" stroke-width="3"/><path d="M20 42 L24 31 L28 42 Z" fill="#0b1026"/></svg>`;
+
+const erPause = () => { const t = new Date().getHours(); return t >= 8 && t < 16; };
+const tilfeldig = a => a[Math.floor(Math.random() * a.length)];
+const vent = ms => new Promise(r => setTimeout(r, ms));
+const scroll = () => chat.scrollTop = chat.scrollHeight;
+
+function oppdaterStatus() {
+  document.getElementById('status').textContent =
+    erPause() ? "Pause til 16:00" : tilfeldig(STATUSER);
+}
+oppdaterStatus();
+setInterval(oppdaterStatus, 15000);
+
+function visTom() {
+  inner.innerHTML = `
+    <div class="tom">
+      <svg class="stor-lavvo" viewBox="0 0 48 48" fill="none">
+        <path d="M24 6 L8 42 H40 Z" fill="#1d4ed8"/><path d="M24 6 L16 24 H32 Z" fill="#d62828"/>
+        <path d="M12 33 H36" stroke="#facc15" stroke-width="3"/><path d="M10 37.5 H38" stroke="#16a34a" stroke-width="3"/>
+        <path d="M20 42 L24 31 L28 42 Z" fill="#0b1026"/>
+        <path d="M24 6 L20 1 M24 6 L28 1 M24 6 L24 0" stroke="#eef3ff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <h2>Spør sjamanen</h2>
+      <p>Verdens første språkmodell som er for opptatt til å svare. Trent på 400 rein og én termos.</p>
+      <div class="skilt">ÅPNINGSTIDER<br>Man–fre: nei<br>Lør–søn: absolutt ikke</div>
+      <div class="forslag">${FORSLAG.map(([a, b]) => `<button data-q="${a}">${a}<small>${b}</small></button>`).join('')}</div>
+    </div>`;
+  inner.querySelectorAll('.forslag button').forEach(b => b.onclick = () => sendMelding(b.dataset.q));
+}
+
+// ---------- Samtaler (lagres i nettleseren) ----------
+const NØKKEL = 'sjaman-gpt-samtaler';
+let samtaler = [];
+try { samtaler = JSON.parse(localStorage.getItem(NØKKEL)) || []; } catch { samtaler = []; }
+let aktivId = null, økt = 0;
+function lagre() { try { localStorage.setItem(NØKKEL, JSON.stringify(samtaler)); } catch {} }
+const aktiv = () => samtaler.find(s => s.id === aktivId);
+
+const app = document.getElementById('app');
+const liste = document.getElementById('samtaleListe');
+const mobil = matchMedia('(max-width: 800px)');
+function lukkMenyMobil() { app.classList.remove('meny-åpen'); }
+document.getElementById('menyKnapp').onclick = () =>
+  app.classList.toggle(mobil.matches ? 'meny-åpen' : 'uten-meny');
+document.querySelector('.meny-skygge').onclick = lukkMenyMobil;
+document.getElementById('sideNy').onclick = () => nyChat();
+document.getElementById('sideOppgrader').onclick = () => åpne('proModal');
+
+function gruppe(tid) {
+  const idag = new Date().setHours(0, 0, 0, 0);
+  const dag = new Date(tid).setHours(0, 0, 0, 0);
+  const diff = Math.round((idag - dag) / 864e5);
+  return diff <= 0 ? 'I dag' : diff === 1 ? 'I går' : diff < 7 ? 'Siste 7 dager' : 'Eldre';
+}
+
+function tegnListe() {
+  liste.innerHTML = '';
+  if (!samtaler.length) {
+    liste.innerHTML = '<p class="tom-liste">Ingen samtaler ennå. Sjamanen er glad for det.</p>';
+    return;
+  }
+  let forrige = null;
+  for (const s of samtaler) {
+    const g = gruppe(s.tid);
+    if (g !== forrige) {
+      const h = document.createElement('h4');
+      h.textContent = g; liste.appendChild(h); forrige = g;
+    }
+    const rad = document.createElement('div');
+    rad.className = 'samtale' + (s.id === aktivId ? ' aktiv' : '');
+    const velg = document.createElement('button');
+    velg.className = 'velg'; velg.textContent = s.tittel; velg.title = s.tittel;
+    velg.onclick = () => visSamtale(s.id);
+    const slett = document.createElement('button');
+    slett.className = 'slett'; slett.textContent = '✕'; slett.title = 'Slett samtale';
+    slett.onclick = () => {
+      samtaler = samtaler.filter(x => x !== s); lagre();
+      if (s.id === aktivId) visSamtale(null); else tegnListe();
+      toast("Samtalen er slettet. Sjamanen merket ingen forskjell.");
+    };
+    rad.append(velg, slett);
+    liste.appendChild(rad);
+  }
+}
+
+function oppdaterTeller() {
+  const s = aktiv();
+  const n = s ? s.meldinger.filter(m => m.rolle === 'sjaman').length : 0;
+  document.getElementById('teller').textContent = `Spørsmål besvart: 0 av ${n}`;
+}
+
+// ---------- Bygge meldinger ----------
+function leggTilBruker(tekst) {
+  const u = document.createElement('div');
+  u.className = 'msg bruker'; u.textContent = tekst;
+  inner.appendChild(u);
+}
+
+function lagSjaman() {
+  const m = document.createElement('div');
+  m.className = 'msg sjaman';
+  m.innerHTML = `<div class="avatar">${avatar}</div><div class="boble"><div class="navn">Sjamanen</div><div class="innhold"></div></div>`;
+  inner.appendChild(m);
+  return m;
+}
+
+function lydmelding(p, svar) {
+  p.className = 'lydmelding';
+  p.innerHTML = `<button title="Spill av">▶</button><span class="bølge">${'<i></i>'.repeat(24)}</span>`;
+  p.querySelector('button').onclick = () => spill(svar.lyd);
+}
+
+function leggTilHandlinger(m, svar) {
+  const h = document.createElement('div');
+  h.className = 'handlinger';
+  h.innerHTML = `<button title="Spill av">🔊</button><button title="Kopier">⧉</button><button title="Bra">👍</button><button title="Dårlig">👎</button>`;
+  const [spillKnapp, kopier, opp, ned] = h.querySelectorAll('button');
+  spillKnapp.onclick = () => spill(svar.lyd);
+  kopier.onclick = () => { navigator.clipboard?.writeText(svar.tekst || '🔊'); kopier.textContent = '✓'; };
+  if (!svar.lyd) spillKnapp.remove();
+  opp.onclick = () => opp.textContent = '🦌';
+  ned.onclick = () => ned.textContent = '🙄';
+  m.querySelector('.boble').appendChild(h);
+}
+
+function leggTilMersalg() {
+  const ms = document.createElement('div');
+  ms.className = 'mersalg';
+  ms.innerHTML = `<span>Du har brukt opp dine <b>0</b> gratis svar for i dag.</span><button>✦ Oppgrader til Pro</button>`;
+  ms.querySelector('button').onclick = () => åpne('proModal');
+  inner.appendChild(ms);
+}
+
+function visSvarStatisk(svar) {
+  const m = lagSjaman();
+  const p = document.createElement('div');
+  m.querySelector('.innhold').appendChild(p);
+  if (svar.tekst) p.textContent = svar.tekst; else lydmelding(p, svar);
+  leggTilHandlinger(m, svar);
+}
+
+function visSamtale(id) {
+  økt++;                       // avbryter et svar som holder på å skrives
+  opptatt = false;
+  if (lydNå) lydNå.pause();
+  aktivId = id;
+  const s = aktiv();
+  if (!s) { aktivId = null; visTom(); }
+  else {
+    inner.innerHTML = '';
+    for (const m of s.meldinger) {
+      if (m.rolle === 'bruker') leggTilBruker(m.tekst);
+      else if (m.rolle === 'sjaman') visSvarStatisk(m.svar);
+      else if (m.rolle === 'mersalg') leggTilMersalg();
+    }
+    chat.scrollTop = chat.scrollHeight;
+  }
+  oppdaterTeller();
+  tegnListe();
+  lukkMenyMobil();
+}
+
+function nyChat() { visSamtale(null); input.focus(); }
+
+const lydKnapp = document.getElementById('lydKnapp');
+const vLyd = document.getElementById('vLyd');
+function settLyd(på) {
+  lydPå = på;
+  lydKnapp.textContent = på ? '🔊' : '🔇';
+  vLyd.checked = på;
+  if (!på && lydNå) lydNå.pause();
+}
+lydKnapp.onclick = () => settLyd(!lydPå);
+vLyd.onchange = () => settLyd(vLyd.checked);
+
+function spill(fil) {
+  if (!fil) return;
+  if (lydNå) lydNå.pause();
+  lydNå = new Audio(fil);
+  lydNå.play().catch(() => {});
+}
+
+function velgSvar(spørsmål) {
+  const s = spørsmål.toLowerCase();
+  const spesial = SPESIAL.find(x => x.ord.some(o => new RegExp(`(^|[^a-zæøå])${o}`, 'i').test(s)));
+  if (spesial && spesial.svar.length && Math.random() < (spesial.sjanse ?? 0.7)) return tilfeldig(spesial.svar);
+  if (erPause() && PAUSESVAR.length && Math.random() < 0.5) return tilfeldig(PAUSESVAR);
+  let i;
+  do { i = Math.floor(Math.random() * SVAR.length); } while (i === sisteIndex && SVAR.length > 1);
+  sisteIndex = i;
+  return SVAR[i];
+}
+
+async function sendMelding(tekst) {
+  tekst = tekst.trim();
+  if (!tekst || opptatt) return;
+  opptatt = true;
+  const minØkt = økt;
+
+  let s = aktiv();
+  if (!s) {
+    s = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      tittel: tekst.length > 40 ? tekst.slice(0, 40).trim() + '…' : tekst,
+      tid: Date.now(), meldinger: [],
+    };
+    aktivId = s.id;
+    inner.innerHTML = '';
+  }
+  s.meldinger.push({ rolle: 'bruker', tekst });
+  s.tid = Date.now();
+  samtaler = [s, ...samtaler.filter(x => x !== s)];   // nyeste øverst
+  lagre(); tegnListe();
+
+  leggTilBruker(tekst);
+  input.value = ''; oppdaterInput();
+
+  const m = lagSjaman();
+  const innhold = m.querySelector('.innhold');
+  innhold.innerHTML = `<div class="tenker"><span class="rein-løper">🦌</span> ${tilfeldig(TENKER)} …</div>`;
+  scroll();
+  await vent(1800 + Math.random() * 2200);
+
+  // Svaret lagres selv om brukeren har byttet samtale i mellomtiden
+  const svar = velgSvar(tekst);
+  s.meldinger.push({ rolle: 'sjaman', svar });
+  const antallSvar = s.meldinger.filter(x => x.rolle === 'sjaman').length;
+  const mersalg = antallSvar % 4 === 0;
+  if (mersalg) s.meldinger.push({ rolle: 'mersalg' });
+  lagre();
+  if (økt !== minØkt) return;
+
+  if (lydPå) spill(svar.lyd);
+  const p = document.createElement('div');
+  innhold.innerHTML = ''; innhold.appendChild(p);
+  if (svar.tekst) {
+    for (const ord of svar.tekst.split(' ')) {
+      if (økt !== minØkt) return;
+      p.textContent += (p.textContent ? ' ' : '') + ord;
+      scroll();
+      await vent(50 + Math.random() * 70);
+    }
+    if (økt !== minØkt) return;
+  } else {
+    lydmelding(p, svar);
+  }
+
+  leggTilHandlinger(m, svar);
+  oppdaterTeller();
+  if (mersalg) leggTilMersalg();
+  scroll();
+  opptatt = false;
+}
+
+function oppdaterInput() {
+  send.disabled = !input.value.trim();
+  input.style.height = 'auto';
+  input.style.height = input.scrollHeight + 'px';
+}
+input.addEventListener('input', oppdaterInput);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMelding(input.value); }
+});
+send.onclick = () => sendMelding(input.value);
+
+// ---------- Snøfall ----------
+const c = document.getElementById('snø'), ctx = c.getContext('2d');
+let fnugg = [];
+function størrelse() {
+  c.width = innerWidth; c.height = innerHeight;
+  fnugg = Array.from({ length: Math.floor(innerWidth / 12) }, () => ({
+    x: Math.random() * c.width, y: Math.random() * c.height,
+    r: Math.random() * 2 + .5, v: Math.random() * .6 + .2, s: Math.random() * 2 * Math.PI,
+  }));
+}
+function snø() {
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.fillStyle = 'rgba(238,243,255,.8)';
+  if (snøPå) for (const f of fnugg) {
+    f.y += f.v; f.s += .01; f.x += Math.sin(f.s) * .3;
+    if (f.y > c.height) { f.y = -5; f.x = Math.random() * c.width; }
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill();
+  }
+  requestAnimationFrame(snø);
+}
+addEventListener('resize', størrelse);
+størrelse(); snø();
+
+// ---------- Modaler, oppgradering og innstillinger ----------
+const toastEl = document.getElementById('toast');
+let toastTid;
+function toast(tekst) {
+  toastEl.textContent = tekst;
+  toastEl.hidden = true; void toastEl.offsetWidth; toastEl.hidden = false;
+  clearTimeout(toastTid);
+  toastTid = setTimeout(() => toastEl.hidden = true, 3800);
+}
+
+const modaler = document.querySelectorAll('.modal-bakgrunn');
+function åpne(id) { modaler.forEach(m => m.hidden = m.id !== id); }
+function lukkAlle() { modaler.forEach(m => m.hidden = true); }
+modaler.forEach(m => m.addEventListener('click', e => {
+  if (e.target === m || e.target.closest('[data-lukk]')) lukkAlle();
+}));
+addEventListener('keydown', e => { if (e.key === 'Escape') { lukkAlle(); lukkMenyMobil(); } });
+document.getElementById('oppgraderKnapp').onclick = () => åpne('proModal');
+document.getElementById('innstKnapp').onclick = () => åpne('innstModal');
+document.getElementById('tilPro').onclick = () => åpne('proModal');
+
+const AVVIST = [
+  "Betaling avvist: tørrfisken var for fersk.",
+  "Kortet ditt ble spist av gjeterhunden.",
+  "Betalingsterminalen har ikke dekning. Kjør 11 mil og prøv igjen.",
+  "Sjamanen tok imot tørrfisken, men oppgraderte deg ikke.",
+  "Reinen godkjente ikke transaksjonen.",
+  "Betaling feilet: tørrfisken frøs fast i terminalen.",
+];
+document.querySelectorAll('.kjøp').forEach(b => b.onclick = async () => {
+  if (b.disabled) return;
+  const orig = b.textContent;
+  b.disabled = true;
+  b.textContent = b.dataset.plan === 'Siida' ? 'Ringer …' : 'Teller tørrfisk …';
+  await vent(1400 + Math.random() * 1200);
+  b.textContent = orig; b.disabled = false;
+  toast(b.dataset.plan === 'Siida' ? "Bestemor la på. Hun er i telefonen med noen andre." : tilfeldig(AVVIST));
+});
+
+document.getElementById('vSnø').onchange = e => snøPå = e.target.checked;
+document.getElementById('vNordlys').onchange = e => document.querySelector('.nordlys').hidden = !e.target.checked;
+document.getElementById('vModell').onchange = () => toast("Modell byttet. Ingen merkbar forskjell.");
+document.getElementById('vSpråk').onchange = () => toast("Språk endret. Han svarer ikke på det språket heller.");
+const LENGDER = ["Kort", "Kortere", "Ett ord", "Nei"];
+document.getElementById('vLengde').oninput = e => document.getElementById('lengdeTekst').textContent = LENGDER[e.target.value];
+document.getElementById('vHjelp').onclick = e => {
+  e.preventDefault();
+  toast("Hjelpsomhet krever Sjaman Pro.");
+  åpne('proModal');
+};
+document.getElementById('vMinne').onchange = async e => {
+  if (!e.target.checked) return;
+  await vent(700);
+  e.target.checked = false;
+  toast("Han glemte det.");
+};
+document.getElementById('vSlett').onclick = () => {
+  samtaler = []; lagre(); visSamtale(null);
+  toast("Alle samtaler er slettet. Han husket dem ikke uansett.");
+};
+document.getElementById('vLoggUt').onclick = () => toast("Du var aldri logget inn.");
+
+visSamtale(null);
+</script>
+</body>
+</html>
