@@ -54,6 +54,20 @@ const SVAR = [
   { tekst: "Nei.", lyd: "lyd/35.mp3" },
   { tekst: "Jokeren stenger seks, jeg måtte gå for å rekke den.", lyd: "lyd/36.mp3" },
 
+  // ---- Korte svar som passer til alt ----
+  { tekst: "Hm.", lyd: "lyd/generisk-01.mp3" },
+  { tekst: "Kanskje.", lyd: "lyd/generisk-02.mp3" },
+  { tekst: "Hæ?", lyd: "lyd/generisk-03.mp3" },
+  { tekst: "Spør bestemor.", lyd: "lyd/generisk-04.mp3" },
+  { tekst: "Ikke nå.", lyd: "lyd/generisk-05.mp3" },
+  { tekst: "Det får vi se til våren.", lyd: "lyd/generisk-06.mp3" },
+  { tekst: "Jeg tenker. Ikke stress meg.", lyd: "lyd/generisk-07.mp3" },
+  { tekst: "Ja. Nei. Kanskje.", lyd: "lyd/generisk-08.mp3" },
+  { tekst: "Prøv igjen etter flyttinga.", lyd: "lyd/generisk-09.mp3" },
+  { tekst: "Hysj. Jeg ser på nordlyset.", lyd: "lyd/generisk-10.mp3" },
+  { tekst: "Interessant. Uansett.", lyd: "lyd/generisk-11.mp3" },
+  { tekst: "Det vet reinen.", lyd: "lyd/generisk-12.mp3" },
+
   // ---- Deres egne lyder: legg dem til her ----
   // { lyd: "lyd/sukk.mp3" },
   // { tekst: "Hva sa du?", lyd: "lyd/hva-sa-du.mp3" },
