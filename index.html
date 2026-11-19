@@ -759,7 +759,7 @@ async function sendMelding(tekst) {
 
   // Svaret lagres selv om brukeren har byttet samtale i mellomtiden
   const harBildesvar = bilde && typeof BILDESVAR !== 'undefined' && BILDESVAR.length;
-  const svar = harBildesvar && (!tekst || Math.random() < 0.7) ? tilfeldig(BILDESVAR) : velgSvar(tekst);
+  const svar = harBildesvar ? tilfeldig(BILDESVAR) : velgSvar(tekst);
   s.meldinger.push({ rolle: 'sjaman', svar });
   const antallSvar = s.meldinger.filter(x => x.rolle === 'sjaman').length;
   const mersalg = antallSvar % 4 === 0;

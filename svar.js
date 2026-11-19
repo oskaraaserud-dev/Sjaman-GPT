@@ -75,7 +75,7 @@ const SVAR = [
 
 
 // Svar når noen sender et bilde.
-// Bare bilde: alltid herfra. Bilde + tekst: 7 av 10 ganger herfra.
+// Kommer alltid herfra når meldingen har et bilde (med eller uten tekst).
 const BILDESVAR = [
   { tekst: "Er det en rein?", lyd: "lyd/bilde-01.mp3" },
   { tekst: "Det der er ikke en rein.", lyd: "lyd/bilde-02.mp3" },
