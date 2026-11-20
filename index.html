@@ -437,14 +437,12 @@ let lydPå = true, opptatt = false, sisteIndex = -1, lydNå = null, antall = 0, 
 
 const avatar = `<svg viewBox="0 0 48 48"><path d="M24 6 L8 42 H40 Z" fill="#1d4ed8"/><path d="M24 6 L16 24 H32 Z" fill="#d62828"/><path d="M12 33 H36" stroke="#facc15" stroke-width="3"/><path d="M20 42 L24 31 L28 42 Z" fill="#0b1026"/></svg>`;
 
-const erPause = () => { const t = new Date().getHours(); return t >= 8 && t < 16; };
 const tilfeldig = a => a[Math.floor(Math.random() * a.length)];
 const vent = ms => new Promise(r => setTimeout(r, ms));
 const scroll = () => chat.scrollTop = chat.scrollHeight;
 
 function oppdaterStatus() {
-  document.getElementById('status').textContent =
-    erPause() ? "Pause til 16:00" : tilfeldig(STATUSER);
+  document.getElementById('status').textContent = tilfeldig(STATUSER);
 }
 oppdaterStatus();
 setInterval(oppdaterStatus, 15000);
@@ -719,7 +717,6 @@ function velgSvar(spørsmål) {
   const s = spørsmål.toLowerCase();
   const spesial = SPESIAL.find(x => x.ord.some(o => new RegExp(`(^|[^a-zæøå])${o}`, 'i').test(s)));
   if (spesial && spesial.svar.length && Math.random() < (spesial.sjanse ?? 1)) return tilfeldig(spesial.svar);
-  if (erPause() && PAUSESVAR.length && Math.random() < 0.5) return tilfeldig(PAUSESVAR);
   let i;
   do { i = Math.floor(Math.random() * SVAR.length); } while (i === sisteIndex && SVAR.length > 1);
   sisteIndex = i;

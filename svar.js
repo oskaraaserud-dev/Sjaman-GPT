@@ -89,13 +89,6 @@ const BILDESVAR = [
 ];
 
 
-// Svar som brukes i pausen 08–16 (halvparten av gangene).
-// Legg gjerne til flere.
-const PAUSESVAR = [
-  { tekst: "Sjamanen har pause fra 08 til 16. Prøv igjen klokka 16.01.", lyd: "lyd/pause.mp3" },
-];
-
-
 // Spesialsvar: hvis spørsmålet inneholder et av ordene, kommer
 // et av svarene i lista.
 // "sjanse" = hvor ofte (1 = alltid, 0.7 = 7 av 10 ganger). Står det ikke noe, er det 1 (alltid).
