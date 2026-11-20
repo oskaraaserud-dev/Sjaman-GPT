@@ -706,11 +706,27 @@ function settLyd(på) {
 lydKnapp.onclick = () => settLyd(!lydPå);
 vLyd.onchange = () => settLyd(vLyd.checked);
 
+// Mobiler (særlig iPhone) blokkerer lyd som ikke starter direkte fra et trykk.
+// Svaret spilles først etter at sjamanen har "tenkt", så vi bruker én felles
+// spiller som låses opp (med et stille lydklipp) i selve trykket.
+const STILLE = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+const spiller = new Audio();
+spiller.preload = 'auto';
+lydNå = spiller;
+let opplåst = false;
+function låsOppLyd() {
+  if (opplåst) return;
+  opplåst = true;
+  try { spiller.src = STILLE; spiller.play().catch(() => { opplåst = false; }); } catch { opplåst = false; }
+}
+['pointerdown', 'touchend', 'keydown'].forEach(t => document.addEventListener(t, låsOppLyd, { capture: true, passive: true }));
+
 function spill(fil) {
   if (!fil) return;
-  if (lydNå) lydNå.pause();
-  lydNå = new Audio(fil);
-  lydNå.play().catch(() => {});
+  spiller.pause();
+  spiller.src = fil;
+  spiller.currentTime = 0;
+  spiller.play().catch(() => {});
 }
 
 function velgSvar(spørsmål) {
